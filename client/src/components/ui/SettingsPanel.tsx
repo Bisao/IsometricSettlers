@@ -121,3 +121,5 @@ export function SettingsButton() {
     </>
   );
 }
+
+export default SettingsPanel;

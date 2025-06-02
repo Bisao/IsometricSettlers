@@ -17,7 +17,7 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   const eyesRef = useRef<THREE.Group>(null);
 
   // Generate consistent appearance based on name
-  const nameHash = (firstName + lastName).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const nameHash = `${firstName || ''}${lastName || ''}`.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
   // Clothing colors
   const shirtColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];

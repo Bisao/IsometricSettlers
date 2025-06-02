@@ -5,7 +5,10 @@ import Grid from "./Grid";
 import Camera from "./Camera";
 import { useAudio } from "../../lib/stores/useAudio";
 import { useNPCAI } from "../../hooks/useNPCAI";
-
+import BuildingPanel from "../ui/BuildingPanel";
+import BuildingDetailsPanel from "../ui/BuildingDetailsPanel";
+import SettingsPanel from "../ui/SettingsPanel";
+import CombatHUD from "../ui/CombatHUD";
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useMode } from "../../lib/stores/useMode";
 
@@ -32,7 +35,7 @@ export default function GameScene() {
   }, []);
 
   return (
-    <>
+    <div>
       <group ref={sceneRef}>
         {/* Lighting setup */}
         <ambientLight intensity={0.4} />
@@ -67,6 +70,32 @@ export default function GameScene() {
           target={[0, 0, 0]}
         />
       </group>
-    </>
+
+      {/* UI Panels */}
+      <BuildingPanel />
+
+      {selectedBuildingId && (
+        <BuildingDetailsPanel buildingId={selectedBuildingId} />
+      )}
+
+      <SettingsPanel />
+
+      {/* Combat HUD - only show when NPC is controlled or in auto mode and in combat */}
+      {controlledNPCId && (
+        <CombatHUD 
+          npcId={controlledNPCId}
+          isVisible={true}
+        />
+      )}
+
+      {/* Show combat HUD for NPCs in auto mode that are in combat */}
+      {npcs.filter(npc => npc.isAutoMode && npc.isInCombat).map(npc => (
+        <CombatHUD 
+          key={npc.id}
+          npcId={npc.id}
+          isVisible={true}
+        />
+      ))}
+    </div>
   );
 }

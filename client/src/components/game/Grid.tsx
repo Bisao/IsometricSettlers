@@ -172,11 +172,11 @@ export default function Grid() {
 
         let npcGridPos: [number, number, number];
 
-        // Sempre use a posição atual do NPC se disponível, independente do modo
+        // Always use current NPC position if available
         if (npc.gridX !== undefined && npc.gridZ !== undefined) {
           npcGridPos = [npc.gridX, 0, npc.gridZ];
         } else {
-          // Fallback para posição da casa
+          // Fallback to house position
           npcGridPos = [building.gridX, 0, building.gridZ];
         }
 
@@ -188,6 +188,13 @@ export default function Grid() {
             lastName={npc.lastName}
             isSelected={selectedBuildingId === npc.houseId}
             isControlled={npc.isControlled}
+            npcId={npc.id}
+            showVision={npc.showVision}
+            visionRange={npc.visionRange}
+            visionAngle={npc.visionAngle}
+            aiPersonality={npc.aiPersonality}
+            aiMood={npc.aiMood}
+            aiEnergy={npc.aiEnergy}
           />
         );
       })}

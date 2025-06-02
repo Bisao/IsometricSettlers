@@ -25,10 +25,17 @@ interface NPC {
   gridZ?: number;
   isControlled?: boolean;
   isAutoMode?: boolean;
-  aiState?: 'at_home' | 'exploring' | 'returning';
+  aiState?: 'at_home' | 'exploring' | 'returning' | 'socializing';
   aiLastStateChange?: Date;
   aiTargetX?: number;
   aiTargetZ?: number;
+  aiPersonality?: 'explorer' | 'homebody' | 'social' | 'worker';
+  aiEnergy?: number;
+  aiMood?: 'happy' | 'sad' | 'neutral';
+  aiMemory?: any[];
+  showVision?: boolean;
+  visionRange?: number;
+  visionAngle?: number;
 }
 
 interface BuildingState {
@@ -53,6 +60,8 @@ interface BuildingState {
   setOpenInventoryNPCId: (npcId: string | null) => void;
   setNPCAutoMode: (npcId: string, autoMode: boolean) => void;
   updateNPCAI: () => void;
+    toggleNPCVision: (npcId: string) => void;
+  toggleAllNPCVision: () => void;
 }
 
 export const useBuilding = create<BuildingState>()(
@@ -120,30 +129,57 @@ export const useBuilding = create<BuildingState>()(
       }));
     },
 
-    createNPC: (npcData) => {
-      const { npcs, placedBuildings } = get();
-      const building = placedBuildings.find(b => b.id === npcData.houseId);
+    createNPC: (npcData: { firstName: string; lastName: string; houseId: string }) => {
+    const { npcs, placedBuildings } = get();
+    const building = placedBuildings.find(b => b.id === npcData.houseId);
 
-      if (!building) {
-        console.error('Building not found for NPC creation');
-        return;
-      }
+    // Generate personality and traits
+    const personalities: ('explorer' | 'homebody' | 'social' | 'worker')[] = ['explorer', 'homebody', 'social', 'worker'];
+    const personality = personalities[Math.floor(Math.random() * personalities.length)];
 
-      const newNPC: NPC = {
-        id: `npc-${Date.now()}`,
-        firstName: npcData.firstName,
-        lastName: npcData.lastName,
-        houseId: npcData.houseId,
-        gridX: building.gridX,
-        gridZ: building.gridZ,
-        isControlled: false,
-        isAutoMode: false,
-        aiState: 'at_home',
-        aiLastStateChange: new Date(),
+    if (building) {
+      set(state => ({
+        npcs: [...state.npcs, {
+          id: `npc-${Date.now()}`,
+          firstName: npcData.firstName,
+          lastName: npcData.lastName,
+          houseId: npcData.houseId,
+          gridX: building.gridX,
+          gridZ: building.gridZ,
+          isControlled: false,
+          isAutoMode: false,
+          aiState: 'at_home',
+          aiLastStateChange: new Date(),
+          aiPersonality: personality,
+          aiEnergy: 80 + Math.floor(Math.random() * 20), // 80-100
+          aiMood: 'happy',
+          aiMemory: [],
+          showVision: false,
+          visionRange: personality === 'explorer' ? 4 : personality === 'social' ? 3 : 2,
+          visionAngle: 60
+        }]
+      }));
+    }
+  },
+
+  toggleNPCVision: (npcId: string) => {
+    set(state => ({
+      npcs: state.npcs.map(npc => 
+        npc.id === npcId 
+          ? { ...npc, showVision: !npc.showVision }
+          : npc
+      )
+    }));
+  },
+
+  toggleAllNPCVision: () => {
+    set(state => {
+      const anyVisionVisible = state.npcs.some(npc => npc.showVision);
+      return {
+        npcs: state.npcs.map(npc => ({ ...npc, showVision: !anyVisionVisible }))
       };
-
-      set({ npcs: [...npcs, newNPC] });
-    },
+    });
+  },
 
     setSelectedBuildingId: (id) => {
       set({ selectedBuildingId: id });
@@ -164,7 +200,7 @@ export const useBuilding = create<BuildingState>()(
     moveNPCToPosition: (npcId, gridX, gridZ) => {
       const { npcs } = get();
       const npc = npcs.find(n => n.id === npcId);
-      
+
       if (npc) {
         console.log(`Store: Moving NPC ${npc.firstName} to (${gridX}, ${gridZ})`);
       }
@@ -185,7 +221,7 @@ export const useBuilding = create<BuildingState>()(
     setNPCAutoMode: (npcId, autoMode) => {
       const { npcs, placedBuildings } = get();
       const npc = npcs.find(n => n.id === npcId);
-      
+
       if (!npc) return;
 
       // Se desabilitando auto mode, reseta o NPC para casa
@@ -236,76 +272,250 @@ export const useBuilding = create<BuildingState>()(
         const building = placedBuildings.find(b => b.id === npc.houseId);
         if (!building) return npc;
 
+        const newEnergy = Math.max(0, Math.min(100, (npc.aiEnergy || 80) - 0.1)); // Drains 0.1 energy per tick
+        let newMood = npc.aiMood || 'neutral';
+
+        // Mood affects energy drain
+        if (newMood === 'sad') {
+          // Drains extra energy
+        } else if (newMood === 'happy') {
+          // Drains less energy
+        }
         const timeSinceStateChange = now.getTime() - (npc.aiLastStateChange?.getTime() || 0);
-        
+        const personality = npc.aiPersonality || 'explorer';
+
+        // Add memory of current action
+        const memory = [...(npc.aiMemory || [])];
+        if (memory.length > 10) memory.shift(); // Keep only last 10 memories
+
         switch (npc.aiState) {
           case 'at_home':
-            // Fica em casa por 3-5 segundos, depois sai para explorar
-            if (timeSinceStateChange > 3000 + Math.random() * 2000) {
-              // Escolhe um ponto aleatório para explorar (evita a própria casa)
-              let targetX, targetZ;
-              do {
+            let stayTime = 5000; // Base stay time
+
+            // Personality affects behavior
+            switch (personality) {
+              case 'homebody':
+                stayTime = 15000 + Math.random() * 10000; // Stays home longer
+                break;
+              case 'explorer':
+                stayTime = 3000 + Math.random() * 3000; // Leaves home quickly
+                break;
+              case 'social':
+                stayTime = 8000 + Math.random() * 5000; // Moderate stay time
+                break;
+              case 'worker':
+                stayTime = 10000 + Math.random() * 5000; // Stays home for "work"
+                break;
+            }
+
+            // Low energy NPCs stay home longer
+            if (newEnergy < 30) {
+              stayTime *= 2;
+            }
+
+            if (timeSinceStateChange > stayTime) {
+              let targetX: number, targetZ: number;
+
+              // Choose target based on personality
+              if (personality === 'explorer') {
+                // Explorers go to map edges
+                const edge = Math.floor(Math.random() * 4);
+                switch (edge) {
+                  case 0: targetX = 0; targetZ = Math.floor(Math.random() * 15); break;
+                  case 1: targetX = 14; targetZ = Math.floor(Math.random() * 15); break;
+                  case 2: targetX = Math.floor(Math.random() * 15); targetZ = 0; break;
+                  default: targetX = Math.floor(Math.random() * 15); targetZ = 14; break;
+                }
+              } else if (personality === 'social') {
+                // Social NPCs visit other houses
+                const otherBuildings = placedBuildings.filter(b => b.id !== npc.houseId);
+                if (otherBuildings.length > 0) {
+                  const targetBuilding = otherBuildings[Math.floor(Math.random() * otherBuildings.length)];
+                  targetX = targetBuilding.gridX;
+                  targetZ = targetBuilding.gridZ;
+                } else {
+                  targetX = 7 + Math.floor(Math.random() * 3) - 1; // Center area
+                  targetZ = 7 + Math.floor(Math.random() * 3) - 1;
+                }
+              } else {
+                // Default random movement
                 targetX = Math.floor(Math.random() * 15);
                 targetZ = Math.floor(Math.random() * 15);
-              } while (targetX === building.gridX && targetZ === building.gridZ);
-              
-              console.log(`NPC ${npc.firstName} going to explore (${targetX}, ${targetZ})`);
-              
+              }
+
+              memory.push({
+                type: 'left_home',
+                data: { target: [targetX, targetZ], personality },
+                timestamp: now
+              });
+
+              console.log(`NPC ${npc.firstName} (${personality}) starting exploration to (${targetX}, ${targetZ})`);
+
               return {
                 ...npc,
                 aiState: 'exploring',
                 aiTargetX: targetX,
                 aiTargetZ: targetZ,
-                aiLastStateChange: now
+                aiLastStateChange: now,
+                aiEnergy: newEnergy,
+                aiMood: newMood,
+                aiMemory: memory
               };
             }
             break;
-            
+
           case 'exploring':
-            // Verifica se chegou no destino de exploração
+            // Check if reached destination
             if (npc.gridX === npc.aiTargetX && npc.gridZ === npc.aiTargetZ) {
-              // Chegou no destino, escolhe um novo ponto ou volta para casa
-              if (Math.random() > 0.3) { // 70% chance de continuar explorando
-                let targetX, targetZ;
+              memory.push({
+                type: 'reached_destination',
+                data: { position: [npc.gridX, npc.gridZ], personality },
+                timestamp: now
+              });
+
+              // Decision based on personality and energy
+              let continueExploring = false;
+
+              switch (personality) {
+                case 'explorer':
+                  continueExploring = newEnergy > 30 && Math.random() < 0.8;
+                  break;
+                case 'social':
+                  // Check if at another house, if so, "socialize" for a bit
+                  const atBuilding = placedBuildings.find(b => b.gridX === npc.gridX && b.gridZ === npc.gridZ);
+                  if (atBuilding && atBuilding.id !== npc.houseId) {
+                    memory.push({
+                      type: 'socializing',
+                      data: { buildingId: atBuilding.id },
+                      timestamp: now
+                    });
+                    return {
+                      ...npc,
+                      aiState: 'socializing',
+                      aiLastStateChange: now,
+                      aiEnergy: newEnergy,
+                      aiMood: 'happy',
+                      aiMemory: memory
+                    };
+                  }
+                  continueExploring = newEnergy > 40 && Math.random() < 0.6;
+                  break;
+                case 'worker':
+                  continueExploring = newEnergy > 50 && Math.random() < 0.4;
+                  break;
+                default:
+                  continueExploring = newEnergy > 40 && Math.random() < 0.5;
+              }
+
+              if (continueExploring) {
+                // Continue exploring - choose new destination
+                let targetX: number, targetZ: number;
+
                 do {
-                  targetX = Math.floor(Math.random() * 15);
-                  targetZ = Math.floor(Math.random() * 15);
+                  if (personality === 'explorer') {
+                    // Explorers prefer unvisited areas
+                    targetX = Math.floor(Math.random() * 15);
+                    targetZ = Math.floor(Math.random() * 15);
+                  } else if (personality === 'social') {
+                    // Social NPCs visit other houses
+                    const otherBuildings = placedBuildings.filter(b => b.id !== npc.houseId);
+                    if (otherBuildings.length > 0 && Math.random() < 0.7) {
+                      const targetBuilding = otherBuildings[Math.floor(Math.random() * otherBuildings.length)];
+                      targetX = targetBuilding.gridX;
+                      targetZ = targetBuilding.gridZ;
+                    } else {
+                      targetX = Math.floor(Math.random() * 15);
+                      targetZ = Math.floor(Math.random() * 15);
+                    }
+                  } else {
+                    targetX = Math.floor(Math.random() * 15);
+                    targetZ = Math.floor(Math.random() * 15);
+                  }
                 } while (targetX === npc.gridX && targetZ === npc.gridZ);
-                
-                console.log(`NPC ${npc.firstName} continuing exploration to (${targetX}, ${targetZ})`);
-                
+
+                console.log(`NPC ${npc.firstName} (${personality}) continuing exploration to (${targetX}, ${targetZ})`);
+
                 return {
                   ...npc,
                   aiTargetX: targetX,
                   aiTargetZ: targetZ,
-                  aiLastStateChange: now
+                  aiLastStateChange: now,
+                  aiEnergy: newEnergy,
+                  aiMood: newMood,
+                  aiMemory: memory
                 };
               } else {
-                // Volta para casa
+                // Return home
                 console.log(`NPC ${npc.firstName} returning home`);
                 return {
                   ...npc,
                   aiState: 'returning',
                   aiTargetX: building.gridX,
                   aiTargetZ: building.gridZ,
-                  aiLastStateChange: now
+                  aiLastStateChange: now,
+                  aiEnergy: newEnergy,
+                  aiMood: newMood,
+                  aiMemory: memory
                 };
               }
             }
-            
-            // Se está explorando há muito tempo (20-30 segundos), força volta para casa
-            if (timeSinceStateChange > 20000 + Math.random() * 10000) {
+
+            // Timeout based on personality and energy
+            let maxExploreTime = 20000; // Base 20 seconds
+            if (personality === 'explorer') maxExploreTime = 40000;
+            else if (personality === 'homebody') maxExploreTime = 10000;
+
+            if (newEnergy < 20) maxExploreTime /= 2; // Tired NPCs return faster
+
+            if (timeSinceStateChange > maxExploreTime + Math.random() * 10000) {
               console.log(`NPC ${npc.firstName} timeout, returning home`);
               return {
                 ...npc,
                 aiState: 'returning',
                 aiTargetX: building.gridX,
                 aiTargetZ: building.gridZ,
-                aiLastStateChange: now
+                aiLastStateChange: now,
+                aiEnergy: newEnergy,
+                aiMood: newMood,
+                aiMemory: memory
               };
             }
             break;
-            
+
+          case 'socializing':
+            // Socialize for 3-8 seconds then continue or go home
+            if (timeSinceStateChange > 3000 + Math.random() * 5000) {
+              if (newEnergy > 30 && Math.random() < 0.5) {
+                // Continue exploring
+                let targetX = Math.floor(Math.random() * 15);
+                let targetZ = Math.floor(Math.random() * 15);
+
+                return {
+                  ...npc,
+                  aiState: 'exploring',
+                  aiTargetX: targetX,
+                  aiTargetZ: targetZ,
+                  aiLastStateChange: now,
+                  aiEnergy: newEnergy,
+                  aiMood: 'happy',
+                  aiMemory: memory
+                };
+              } else {
+                // Go home
+                return {
+                  ...npc,
+                  aiState: 'returning',
+                  aiTargetX: building.gridX,
+                  aiTargetZ: building.gridZ,
+                  aiLastStateChange: now,
+                  aiEnergy: newEnergy,
+                  aiMood: newMood,
+                  aiMemory: memory
+                };
+              }
+            }
+            break;
+
           case 'returning':
             // Verifica se chegou em casa
             if (npc.gridX === building.gridX && npc.gridZ === building.gridZ) {
@@ -315,13 +525,22 @@ export const useBuilding = create<BuildingState>()(
                 aiState: 'at_home',
                 aiTargetX: undefined,
                 aiTargetZ: undefined,
-                aiLastStateChange: now
+                aiLastStateChange: now,
+                aiEnergy: newEnergy,
+                aiMood: newMood,
+                aiMemory: memory
               };
             }
             break;
         }
 
-        return npc;
+        // Return updated NPC with energy and mood changes
+        return {
+          ...npc,
+          aiEnergy: newEnergy,
+          aiMood: newMood,
+          aiMemory: memory
+        };
       });
 
       set({ npcs: updatedNPCs });

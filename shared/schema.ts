@@ -59,9 +59,17 @@ export const npcsTable = pgTable("npcs", {
   aiLastStateChange: timestamp("ai_last_state_change").defaultNow(),
   aiTargetX: integer("ai_target_x"),
   aiTargetZ: integer("ai_target_z"),
+  // Advanced AI properties
+  aiPersonality: text("ai_personality"),
+  aiEnergy: integer("ai_energy"), // 0-100
+  aiMood: text("ai_mood"),
   gold: integer("gold").default(100),
   silver: integer("silver").default(50),
   createdAt: timestamp("created_at").defaultNow(),
+  // Vision system
+  showVision: boolean("show_vision").default(false),
+  visionRange: integer("vision_range").default(10),
+  visionAngle: integer("vision_angle").default(90),
 });
 
 export const insertItemSchema = createInsertSchema(items);

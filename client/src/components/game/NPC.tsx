@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
 import { gridToWorld } from "../../lib/gameUtils";
+import { useBuilding } from "../../lib/stores/useBuilding";
 
 interface NPCProps {
   position: [number, number, number];
@@ -10,9 +11,29 @@ interface NPCProps {
   lastName: string;
   isSelected?: boolean;
   isControlled?: boolean;
+  npcId?: string;
+  showVision?: boolean;
+  visionRange?: number;
+  visionAngle?: number;
+  aiPersonality?: 'explorer' | 'homebody' | 'social' | 'worker';
+  aiMood?: 'happy' | 'neutral' | 'tired' | 'excited';
+  aiEnergy?: number;
 }
 
-export default function NPC({ position, firstName, lastName, isSelected = false, isControlled = false }: NPCProps) {
+export default function NPC({ 
+  position, 
+  firstName, 
+  lastName, 
+  isSelected = false, 
+  isControlled = false,
+  npcId,
+  showVision = false,
+  visionRange = 3,
+  visionAngle = 60,
+  aiPersonality = 'explorer',
+  aiMood = 'neutral',
+  aiEnergy = 80
+}: NPCProps) {
   const npcRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Mesh>(null);
   const eyesRef = useRef<THREE.Group>(null);
@@ -73,11 +94,18 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
     }
   }, [position, targetPosition, currentPosition]);
 
-  // Generate consistent appearance based on name
+  // Generate consistent appearance based on name and personality
   const nameHash = `${firstName || ''}${lastName || ''}`.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
-  // Clothing colors
-  const shirtColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
+  // Personality-influenced clothing colors
+  const personalityColors = {
+    explorer: ['#4ECDC4', '#45B7D1', '#96CEB4'], // Cool, adventurous colors
+    homebody: ['#DDA0DD', '#98D8C8', '#FFEAA7'], // Warm, comfortable colors  
+    social: ['#FF6B6B', '#FFD700', '#FF4500'], // Bright, attention-grabbing
+    worker: ['#2C3E50', '#34495E', '#696969'] // Professional, muted colors
+  };
+
+  const shirtColors = personalityColors[aiPersonality] || personalityColors.explorer;
   const pantsColors = ['#2C3E50', '#34495E', '#8B4513', '#2F4F4F', '#696969', '#556B2F'];
   const hairColors = ['#8B4513', '#654321', '#2F1B14', '#FFD700', '#FF4500', '#000000', '#A0522D'];
   const skinTones = ['#FDBCB4', '#F1C27D', '#E0AC69', '#C68642', '#8D5524'];
@@ -88,6 +116,25 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   const skinTone = skinTones[(nameHash + 3) % skinTones.length];
   const hasGlasses = nameHash % 4 === 0;
   const hasHat = nameHash % 5 === 0;
+
+  // Vision cone geometry
+  const visionConeGeometry = new THREE.ConeGeometry(
+    visionRange * Math.tan((visionAngle * Math.PI / 180) / 2), 
+    visionRange, 
+    16, 
+    1, 
+    true
+  );
+  
+  // Mood-based colors
+  const moodColors = {
+    happy: '#FFD700',
+    excited: '#FF6B6B', 
+    neutral: '#FFFFFF',
+    tired: '#B0B0B0'
+  };
+  
+  const moodColor = moodColors[aiMood];
 
   // Animation and movement system
   useFrame((state, delta) => {
@@ -123,12 +170,15 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
     setCurrentPosition(newPos);
     npcRef.current.position.set(newPos[0], newPos[1], newPos[2]);
     
+    // Energy-influenced animation speed
+    const energyMultiplier = Math.max(0.3, aiEnergy / 100);
+    
     // Walking animation
     if (isWalking) {
-      walkCycleRef.current += delta * 8; // Walking speed
+      walkCycleRef.current += delta * 8 * energyMultiplier; // Energy affects walking speed
       
       // Bob up and down while walking
-      npcRef.current.position.y = newPos[1] + Math.sin(walkCycleRef.current) * 0.05;
+      npcRef.current.position.y = newPos[1] + Math.sin(walkCycleRef.current) * (0.05 * energyMultiplier);
       
       // Main body rotation to face movement direction + slight sway
       npcRef.current.rotation.y = newRotation + Math.sin(walkCycleRef.current * 0.5) * 0.08;
@@ -139,15 +189,17 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
         headRef.current.rotation.x = Math.sin(walkCycleRef.current * 0.8) * 0.08;
       }
     } else {
-      // Idle animations
-      npcRef.current.position.y = newPos[1] + Math.sin(state.clock.elapsedTime * 1.5) * 0.02;
+      // Idle animations - affected by mood and energy
+      const idleIntensity = aiMood === 'excited' ? 1.5 : aiMood === 'tired' ? 0.5 : 1.0;
+      npcRef.current.position.y = newPos[1] + Math.sin(state.clock.elapsedTime * 1.5 * energyMultiplier) * (0.02 * idleIntensity);
       
       // Keep facing the last movement direction when idle
       npcRef.current.rotation.y = newRotation;
       
-      // Gentle head movement when idle
+      // Gentle head movement when idle - personality affects look around behavior
       if (headRef.current) {
-        headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.15;
+        const lookAroundIntensity = aiPersonality === 'explorer' ? 1.5 : aiPersonality === 'homebody' ? 0.5 : 1.0;
+        headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * (0.15 * lookAroundIntensity);
         headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.6) * 0.05;
       }
     }
@@ -336,11 +388,27 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
         <meshLambertMaterial color="#FFFFFF" />
       </mesh>
 
-      {/* Enhanced floating name */}
+      {/* Vision Cone */}
+      {showVision && (
+        <mesh 
+          position={[0, 0.1, 0]} 
+          rotation={[-Math.PI / 2, 0, newRotation]}
+        >
+          <primitive object={visionConeGeometry} />
+          <meshLambertMaterial 
+            color="#00FFFF" 
+            transparent 
+            opacity={0.3}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      )}
+
+      {/* Enhanced floating name with personality icon */}
       <Text
         position={[0, 1.4, 0]}
         fontSize={0.12}
-        color={isSelected ? "#FFD700" : "#FFFFFF"}
+        color={isSelected ? "#FFD700" : moodColor}
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.015}
@@ -349,6 +417,33 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
       >
         {firstName} {lastName}
       </Text>
+
+      {/* Personality indicator */}
+      <Text
+        position={[0, 1.25, 0]}
+        fontSize={0.08}
+        color={shirtColor}
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.01}
+        outlineColor="#000000"
+      >
+        {aiPersonality === 'explorer' ? '🗺️' : 
+         aiPersonality === 'social' ? '👥' : 
+         aiPersonality === 'worker' ? '⚙️' : '🏠'}
+      </Text>
+
+      {/* Energy bar */}
+      <group position={[0, 1.55, 0]}>
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[0.3, 0.03, 0.01]} />
+          <meshLambertMaterial color="#333333" />
+        </mesh>
+        <mesh position={[-(0.3 * (1 - aiEnergy / 100)) / 2, 0, 0.005]}>
+          <boxGeometry args={[0.3 * (aiEnergy / 100), 0.025, 0.01]} />
+          <meshLambertMaterial color={aiEnergy > 60 ? "#00FF00" : aiEnergy > 30 ? "#FFFF00" : "#FF0000"} />
+        </mesh>
+      </group>
 
       {/* Enhanced selection indicator */}
       {isSelected && (

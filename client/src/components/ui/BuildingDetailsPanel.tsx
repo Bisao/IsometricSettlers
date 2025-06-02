@@ -24,7 +24,8 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
     moveNPCToPosition,
     openInventoryNPCId,
     setOpenInventoryNPCId,
-    setNPCAutoMode
+    setNPCAutoMode,
+    toggleNPCVision
   } = useBuilding();
 
   const [showCreateNPC, setShowNPCCreation] = useState(false);
@@ -144,9 +145,9 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                               🕹️
                             </button>
                             <button
-                              onClick={() => console.log(`Viewing details for ${npc.firstName} ${npc.lastName}`)}
-                              className="w-8 h-8 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg flex items-center justify-center text-gray-700 transition-colors"
-                              title="Ver Detalhes"
+                              onClick={() => toggleNPCVision(npc.id)}
+                              className={`w-8 h-8 ${npc.showVision ? 'bg-cyan-300 border-cyan-500' : 'bg-gray-100 hover:bg-gray-200 border-gray-300'} rounded-lg flex items-center justify-center text-gray-700 transition-colors`}
+                              title="Toggle Visão do NPC"
                             >
                               👁️
                             </button>

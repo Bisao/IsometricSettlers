@@ -5,6 +5,7 @@ import Grid from "./Grid";
 import Camera from "./Camera";
 import { useAudio } from "../../lib/stores/useAudio";
 import { useNPCAI } from "../../hooks/useNPCAI";
+import { useBuilding } from "../../lib/stores/useBuilding";
 
 export default function GameScene() {
   useAudio();
@@ -25,6 +26,21 @@ export default function GameScene() {
       };
     }
   }, []);
+
+  const { toggleAllNPCVision } = useBuilding();
+
+  // Handle V key for vision toggle
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key.toLowerCase() === 'v') {
+        toggleAllNPCVision();
+        console.log('Toggling all NPC vision');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [toggleAllNPCVision]);
 
   return (
     <group ref={sceneRef}>

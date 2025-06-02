@@ -180,12 +180,9 @@ export default function Grid() {
         if (npc.isControlled && npc.gridX !== undefined && npc.gridZ !== undefined) {
           // Use controlled position
           npcPos = [npc.gridX, 0, npc.gridZ];
-        } else if (npc.isControlled) {
-          // First time controlling - spawn in front of house
-          npcPos = [building.gridX, 0, building.gridZ + 1];
         } else {
-          // Default position in front of house
-          npcPos = [building.gridX, 0, building.gridZ + 1];
+          // Default position - spawn on the same tile as the house
+          npcPos = [building.gridX, 0, building.gridZ];
         }
 
         return (

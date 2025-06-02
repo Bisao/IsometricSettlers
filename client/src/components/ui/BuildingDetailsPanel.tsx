@@ -106,12 +106,9 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                               onClick={() => {
                                 const building = placedBuildings.find(b => b.id === buildingId);
                                 if (building) {
-                                  // Spawn NPC in front of the house when manual control is activated
-                                  const frontX = building.gridX;
-                                  const frontZ = building.gridZ + 1; // In front of the house
-                                  
+                                  // Spawn NPC on the same tile as the house when manual control is activated
                                   setControlledNPC(npc.id);
-                                  console.log(`Setting manual mode for ${npc.firstName} ${npc.lastName} at position (${frontX}, ${frontZ})`);
+                                  console.log(`Setting manual mode for ${npc.firstName} ${npc.lastName} at position (${building.gridX}, ${building.gridZ})`);
                                 }
                               }}
                               className={`w-8 h-8 ${controlledNPCId === npc.id ? 'bg-purple-300 border-purple-500' : 'bg-purple-100 hover:bg-purple-200 border-purple-300'} rounded-lg flex items-center justify-center text-purple-700 transition-colors`}

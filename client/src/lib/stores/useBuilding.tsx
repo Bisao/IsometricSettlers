@@ -24,6 +24,9 @@ interface NPC {
   gridX?: number;
   gridZ?: number;
   isControlled?: boolean;
+  isAutoMode?: boolean;
+  aiState?: 'at_home' | 'exploring' | 'returning';
+  aiLastStateChange?: Date;
 }
 
 interface BuildingState {
@@ -114,18 +117,28 @@ export const useBuilding = create<BuildingState>()(
     },
 
     createNPC: (npcData) => {
+      const { npcs, placedBuildings } = get();
+      const building = placedBuildings.find(b => b.id === npcData.houseId);
+
+      if (!building) {
+        console.error('Building not found for NPC creation');
+        return;
+      }
+
       const newNPC: NPC = {
         id: `npc-${Date.now()}`,
         firstName: npcData.firstName,
         lastName: npcData.lastName,
-        houseId: npcData.houseId
+        houseId: npcData.houseId,
+        gridX: building.gridX,
+        gridZ: building.gridZ,
+        isControlled: false,
+        isAutoMode: false,
+        aiState: 'at_home',
+        aiLastStateChange: new Date(),
       };
 
-      console.log(`Created NPC: ${newNPC.firstName} ${newNPC.lastName} for house ${newNPC.houseId}`);
-
-      set((state) => ({
-        npcs: [...state.npcs, newNPC]
-      }));
+      set({ npcs: [...npcs, newNPC] });
     },
 
     setSelectedBuildingId: (id) => {

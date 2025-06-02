@@ -13,7 +13,7 @@ interface BuildingDetailsPanelProps {
 }
 
 export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDetailsPanelProps) {
-  const { 
+  const {
     placedBuildings, 
     removeBuilding,
     selectedBuildingId, 
@@ -23,7 +23,8 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
     setControlledNPC,
     moveNPCToPosition,
     openInventoryNPCId,
-    setOpenInventoryNPCId
+    setOpenInventoryNPCId,
+    setNPCAutoMode
   } = useBuilding();
 
   const [showCreateNPC, setShowNPCCreation] = useState(false);
@@ -109,9 +110,10 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                               🎒
                             </button>
                             <button
-                              onClick={() => console.log(`Setting auto mode for ${npc.firstName} ${npc.lastName}`)}
-                              className="w-8 h-8 bg-green-100 hover:bg-green-200 border border-green-300 rounded-lg flex items-center justify-center text-green-700 transition-colors"
-                              title="Modo Automático"
+                              onClick={() => setNPCAutoMode(npc.id, !npc.isAutoMode)}
+                              className={`w-8 h-8 ${npc.isAutoMode ? 'bg-orange-300 border-orange-500' : 'bg-green-100 hover:bg-green-200 border-green-300'} rounded-lg flex items-center justify-center transition-colors`}
+                              style={{ color: npc.isAutoMode ? 'orange' : 'green' }}
+                              title={npc.isAutoMode ? "Desativar Modo Automático" : "Ativar Modo Automático"}
                             >
                               🤖
                             </button>
@@ -119,13 +121,25 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                               onClick={() => {
                                 const building = placedBuildings.find(b => b.id === buildingId);
                                 if (building) {
-                                  // Spawn NPC on the same tile as the house when manual control is activated
-                                  setControlledNPC(npc.id);
-                                  console.log(`Setting manual mode for ${npc.firstName} ${npc.lastName} at position (${building.gridX}, ${building.gridZ})`);
+                                  const isCurrentlyControlled = controlledNPCId === npc.id;
+
+                                  if (!isCurrentlyControlled) {
+                                    // Ativar controle manual - desabilitar auto mode se estiver ativo
+                                    if (npc.isAutoMode) {
+                                      setNPCAutoMode(npc.id, false);
+                                    }
+                                    setControlledNPC(npc.id);
+                                    moveNPCToPosition(npc.id, building.gridX, building.gridZ);
+                                    console.log(`Ativando modo manual para ${npc.firstName} ${npc.lastName} at position (${building.gridX}, ${building.gridZ})`);
+                                  } else {
+                                    // Desativar controle manual
+                                    setControlledNPC(null);
+                                    console.log(`Desativando modo manual para ${npc.firstName} ${npc.lastName}`);
+                                  }
                                 }
                               }}
                               className={`w-8 h-8 ${controlledNPCId === npc.id ? 'bg-purple-300 border-purple-500' : 'bg-purple-100 hover:bg-purple-200 border-purple-300'} rounded-lg flex items-center justify-center text-purple-700 transition-colors`}
-                              title="Modo Manual"
+                              title={controlledNPCId === npc.id ? "Desativar Modo Manual" : "Ativar Modo Manual"}
                             >
                               🕹️
                             </button>

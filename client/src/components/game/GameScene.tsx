@@ -3,8 +3,12 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import Grid from "./Grid";
 import Camera from "./Camera";
+import { useAudio } from "../../lib/stores/useAudio";
+import { useNPCAI } from "../../hooks/useNPCAI";
 
 export default function GameScene() {
+  useAudio();
+  useNPCAI();
   const sceneRef = useRef<THREE.Group>(null);
 
   // Prevent default browser context menu on right-click

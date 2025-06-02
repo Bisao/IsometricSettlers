@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -44,6 +44,24 @@ export const npcStats = pgTable("npc_stats", {
   silver: integer("silver").notNull().default(0),
   level: integer("level").notNull().default(1),
   experience: integer("experience").notNull().default(0),
+});
+
+export const npcsTable = pgTable("npcs", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  firstName: varchar("first_name", { length: 100 }).notNull(),
+  lastName: varchar("last_name", { length: 100 }).notNull(),
+  houseId: varchar("house_id", { length: 255 }).notNull(),
+  gridX: integer("grid_x"),
+  gridZ: integer("grid_z"),
+  isControlled: boolean("is_controlled").default(false),
+  isAutoMode: boolean("is_auto_mode").default(false),
+  aiState: varchar("ai_state", { length: 50 }).default("at_home"), // at_home, exploring, returning_home
+  aiLastStateChange: timestamp("ai_last_state_change").defaultNow(),
+  aiTargetX: integer("ai_target_x"),
+  aiTargetZ: integer("ai_target_z"),
+  gold: integer("gold").default(100),
+  silver: integer("silver").default(50),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertItemSchema = createInsertSchema(items);

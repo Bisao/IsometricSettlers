@@ -163,13 +163,20 @@ export const useBuilding = create<BuildingState>()(
   },
 
   toggleNPCVision: (npcId: string) => {
-    set(state => ({
-      npcs: state.npcs.map(npc => 
-        npc.id === npcId 
-          ? { ...npc, showVision: !npc.showVision }
-          : npc
-      )
-    }));
+    set(state => {
+      const targetNPC = state.npcs.find(npc => npc.id === npcId);
+      const newShowVision = !targetNPC?.showVision;
+      
+      return {
+        npcs: state.npcs.map(npc => 
+          npc.id === npcId 
+            ? { ...npc, showVision: newShowVision }
+            : { ...npc, showVision: false } // Desativa visão de outros NPCs
+        ),
+        // Se estiver ativando a visão, controla o NPC automaticamente
+        controlledNPCId: newShowVision ? npcId : (state.controlledNPCId === npcId ? null : state.controlledNPCId)
+      };
+    });
   },
 
   toggleAllNPCVision: () => {

@@ -146,8 +146,9 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                             </button>
                             <button
                               onClick={() => toggleNPCVision(npc.id)}
-                              className={`w-8 h-8 ${npc.showVision ? 'bg-cyan-300 border-cyan-500' : 'bg-gray-100 hover:bg-gray-200 border-gray-300'} rounded-lg flex items-center justify-center text-gray-700 transition-colors`}
-                              title="Toggle Visão do NPC"
+                              className={`w-8 h-8 ${npc.showVision ? 'bg-cyan-400 border-cyan-600 shadow-md' : 'bg-gray-100 hover:bg-gray-200 border-gray-300'} rounded-lg flex items-center justify-center transition-all duration-200`}
+                              style={{ color: npc.showVision ? '#0891b2' : '#374151' }}
+                              title={npc.showVision ? "Desativar Visão do NPC" : "Ativar Visão do NPC"}
                             >
                               👁️
                             </button>

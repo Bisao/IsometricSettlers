@@ -15,13 +15,14 @@ import { useEffect, useState } from "react";
 import { FantasyButton } from "./components/ui/fantasy-ui";
 import { Settings } from "lucide-react";
 import { SettingsPanel } from "./components/ui/SettingsPanel";
+import CombatHUD from "./components/ui/CombatHUD";
 
 const queryClient = new QueryClient();
 
 function App() {
   const { initializeAudio } = useAudio();
   const isMobile = useIsMobile();
-  const { selectedBuildingId, setSelectedBuildingId } = useBuilding();
+  const { selectedBuildingId, setSelectedBuildingId, controlledNPCId, npcs } = useBuilding();
   const [showSettings, setShowSettings] = useState(false);
   const [showStructures, setShowStructures] = useState(false);
 
@@ -113,6 +114,23 @@ function App() {
           isOpen={showStructures}
           onClose={() => setShowStructures(false)}
         />
+
+        {/* Combat HUD - only show when NPC is controlled or in auto mode and in combat */}
+        {controlledNPCId && (
+          <CombatHUD 
+            npcId={controlledNPCId}
+            isVisible={true}
+          />
+        )}
+
+        {/* Show combat HUD for NPCs in auto mode that are in combat */}
+        {npcs.filter(npc => npc.isAutoMode && npc.isInCombat).map(npc => (
+          <CombatHUD 
+            key={npc.id}
+            npcId={npc.id}
+            isVisible={true}
+          />
+        ))}
       </div>
     </QueryClientProvider>
   );

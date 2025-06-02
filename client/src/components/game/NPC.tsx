@@ -338,12 +338,12 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
 
       {/* Enhanced floating name - always faces camera */}
       <Text
-        position={[0, 1.4, 0]}
-        fontSize={0.12}
+        position={[0, 1.6, 0]}
+        fontSize={0.18}
         color={isSelected ? "#FFD700" : "#FFFFFF"}
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.015}
+        outlineWidth={0.02}
         outlineColor="#000000"
         fontWeight="bold"
         billboard={true}

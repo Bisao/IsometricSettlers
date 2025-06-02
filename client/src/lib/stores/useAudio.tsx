@@ -6,6 +6,9 @@ interface AudioState {
   successSound: HTMLAudioElement | null;
   isMuted: boolean;
   
+  // Initialize function
+  initializeAudio: () => void;
+  
   // Setter functions
   setBackgroundMusic: (music: HTMLAudioElement) => void;
   setHitSound: (sound: HTMLAudioElement) => void;
@@ -22,6 +25,33 @@ export const useAudio = create<AudioState>((set, get) => ({
   hitSound: null,
   successSound: null,
   isMuted: true, // Start muted by default
+  
+  initializeAudio: () => {
+    try {
+      // Initialize background music
+      const backgroundMusic = new Audio('/sounds/background.mp3');
+      backgroundMusic.loop = true;
+      backgroundMusic.volume = 0.3;
+      
+      // Initialize sound effects
+      const hitSound = new Audio('/sounds/hit.mp3');
+      hitSound.volume = 0.5;
+      
+      const successSound = new Audio('/sounds/success.mp3');
+      successSound.volume = 0.7;
+      
+      // Set the audio elements in the store
+      set({
+        backgroundMusic,
+        hitSound,
+        successSound
+      });
+      
+      console.log('Audio initialized successfully');
+    } catch (error) {
+      console.log('Failed to initialize audio:', error);
+    }
+  },
   
   setBackgroundMusic: (music) => set({ backgroundMusic: music }),
   setHitSound: (sound) => set({ hitSound: sound }),

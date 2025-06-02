@@ -39,7 +39,7 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
       />
       
       {/* Panel */}
-      <div className={`relative ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'}`}></div>
+      <div className={`relative ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'}`}>
         <FantasyPanel title="👤 Criar Novo Morador" onClose={onClose}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="text-center mb-6 bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-xl border border-purple-200">

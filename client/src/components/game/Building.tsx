@@ -2,17 +2,20 @@ import { useRef } from "react";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useBuilding } from "../../lib/stores/useBuilding";
 
 interface BuildingProps {
   type: "house";
   position: [number, number, number];
   isPreview?: boolean;
   isValid?: boolean;
+  buildingId?: string;
 }
 
-export default function Building({ type, position, isPreview = false, isValid = true }: BuildingProps) {
+export default function Building({ type, position, isPreview = false, isValid = true, buildingId }: BuildingProps) {
   const buildingRef = useRef<THREE.Group>(null);
   const woodTexture = useTexture("/textures/wood.jpg");
+  const { setSelectedBuildingId } = useBuilding();
 
   // Configure wood texture
   woodTexture.wrapS = woodTexture.wrapT = THREE.RepeatWrapping;
@@ -25,8 +28,16 @@ export default function Building({ type, position, isPreview = false, isValid = 
     }
   });
 
+  const handleClick = (event: THREE.Event) => {
+    if (!isPreview && buildingId) {
+      event.stopPropagation();
+      console.log('Clicked on building:', buildingId);
+      setSelectedBuildingId(buildingId);
+    }
+  };
+
   const renderHouse = () => (
-    <group ref={buildingRef} position={position}>
+    <group ref={buildingRef} position={position} onClick={handleClick}>
       {/* House base */}
       <mesh castShadow position={[0, 0.3, 0]}>
         <boxGeometry args={[0.8, 0.6, 0.8]} />

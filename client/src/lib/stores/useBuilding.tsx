@@ -16,10 +16,19 @@ interface PlacedBuilding {
   gridZ: number;
 }
 
+interface NPC {
+  id: string;
+  firstName: string;
+  lastName: string;
+  houseId: string;
+}
+
 interface BuildingState {
   selectedBuilding: BuildingType | null;
   placedBuildings: PlacedBuilding[];
   previewPosition: { x: number; z: number } | null;
+  npcs: NPC[];
+  selectedBuildingId: string | null;
   
   // Actions
   selectBuilding: (building: BuildingType) => void;
@@ -27,6 +36,8 @@ interface BuildingState {
   setPreviewPosition: (position: { x: number; z: number } | null) => void;
   placeBuilding: (gridX: number, gridZ: number) => void;
   removeBuilding: (id: string) => void;
+  createNPC: (npcData: { firstName: string; lastName: string; houseId: string }) => void;
+  setSelectedBuildingId: (id: string | null) => void;
 }
 
 export const useBuilding = create<BuildingState>()(
@@ -34,6 +45,8 @@ export const useBuilding = create<BuildingState>()(
     selectedBuilding: null,
     placedBuildings: [],
     previewPosition: null,
+    npcs: [],
+    selectedBuildingId: null,
     
     selectBuilding: (building) => {
       console.log('Selected building:', building.name);
@@ -88,6 +101,25 @@ export const useBuilding = create<BuildingState>()(
       set((state) => ({
         placedBuildings: state.placedBuildings.filter(building => building.id !== id)
       }));
+    },
+
+    createNPC: (npcData) => {
+      const newNPC: NPC = {
+        id: `npc-${Date.now()}`,
+        firstName: npcData.firstName,
+        lastName: npcData.lastName,
+        houseId: npcData.houseId
+      };
+      
+      console.log(`Created NPC: ${newNPC.firstName} ${newNPC.lastName} for house ${newNPC.houseId}`);
+      
+      set((state) => ({
+        npcs: [...state.npcs, newNPC]
+      }));
+    },
+
+    setSelectedBuildingId: (id) => {
+      set({ selectedBuildingId: id });
     }
   }))
 );

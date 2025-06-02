@@ -3,11 +3,9 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import Grid from "./Grid";
 import Camera from "./Camera";
-import { useBuilding } from "../../lib/stores/useBuilding";
 
 export default function GameScene() {
   const sceneRef = useRef<THREE.Group>(null);
-  const { controlledNPCId } = useBuilding();
 
   // Prevent default browser context menu on right-click
   useEffect(() => {
@@ -43,17 +41,6 @@ export default function GameScene() {
 
       {/* Camera controller */}
       <Camera />
-
-      {/* OrbitControls - Disabled when NPC is being controlled */}
-      <OrbitControls 
-        enabled={!controlledNPCId} // Disable rotation when NPC is controlled
-        enablePan={!controlledNPCId}
-        enableZoom={!controlledNPCId}
-        enableRotate={!controlledNPCId}
-        maxPolarAngle={Math.PI / 2.5} // Limit vertical rotation
-        minDistance={5}
-        maxDistance={25}
-      />
 
       {/* Game Grid */}
       <Grid />

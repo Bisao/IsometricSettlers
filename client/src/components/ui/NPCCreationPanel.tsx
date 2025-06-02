@@ -15,6 +15,8 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
   const { createNPC } = useBuilding();
   const isMobile = useIsMobile();
 
+  console.log('NPCCreationPanel rendered for house:', houseId);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (firstName.trim() && lastName.trim()) {
@@ -29,7 +31,7 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
   };
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"

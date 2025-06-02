@@ -72,7 +72,10 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
               {/* Action Buttons */}
               <div className="space-y-2">
                 <FantasyButton
-                  onClick={() => setShowNPCCreation(true)}
+                  onClick={() => {
+                    console.log('Opening NPC Creation Panel for house:', buildingId);
+                    setShowNPCCreation(true);
+                  }}
                   variant="success"
                   size="md"
                   className="w-full"

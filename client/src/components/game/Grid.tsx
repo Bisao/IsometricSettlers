@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import Building from "./Building";
+import NPC from "./NPC";
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useGridPlacement } from "../../hooks/useGridPlacement";
 import { worldToGrid, gridToWorld } from "../../lib/gameUtils";
@@ -22,7 +23,8 @@ export default function Grid() {
     npcs,
     selectedBuildingId,
     placeBuilding, 
-    clearSelection 
+    clearSelection,
+    setPreviewPosition
   } = useBuilding();
 
   // Configure grass texture

@@ -3,8 +3,9 @@ import { useBuilding } from "../../lib/stores/useBuilding";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 import { FantasyPanel, FantasyButton } from "./fantasy-ui";
 import NPCCreationPanel from "./NPCCreationPanel";
-import { Canvas } from "@react-three/fiber";
+import NPCInventoryPanel from "./NPCInventoryPanel";
 import NPC from "../game/NPC";
+import { Canvas } from "@react-three/fiber";
 
 interface BuildingDetailsPanelProps {
   buildingId: string;
@@ -12,8 +13,19 @@ interface BuildingDetailsPanelProps {
 }
 
 export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDetailsPanelProps) {
-  const [showNPCCreation, setShowNPCCreation] = useState(false);
-  const { placedBuildings, npcs, removeBuilding, setControlledNPC, controlledNPCId } = useBuilding();
+  const { 
+    placedBuildings, 
+    selectedBuildingId, 
+    setSelectedBuildingId, 
+    npcs, 
+    controlledNPCId, 
+    setControlledNPC,
+    moveNPCToPosition,
+    openInventoryNPCId,
+    setOpenInventoryNPCId
+  } = useBuilding();
+
+  const [showCreateNPC, setShowNPCCreation] = useState(false);
   const isMobile = useIsMobile();
 
   const building = placedBuildings.find(b => b.id === buildingId);
@@ -89,7 +101,7 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                           {/* NPC Action Buttons */}
                           <div className="flex gap-1">
                             <button
-                              onClick={() => console.log(`Opening inventory for ${npc.firstName} ${npc.lastName}`)}
+                              onClick={() => setOpenInventoryNPCId(npc.id)}
                               className="w-8 h-8 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg flex items-center justify-center text-amber-700 transition-colors"
                               title="Inventário do NPC"
                             >
@@ -179,10 +191,22 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
       </div>
 
       {/* NPC Creation Panel */}
-      {showNPCCreation && (
+      {showCreateNPC && (
         <NPCCreationPanel
           houseId={buildingId}
           onClose={() => setShowNPCCreation(false)}
+        />
+      )}
+
+      {/* NPC Inventory Panel */}
+      {openInventoryNPCId && (
+        <NPCInventoryPanel
+          npcId={openInventoryNPCId}
+          npcName={(() => {
+            const npc = npcs.find(n => n.id === openInventoryNPCId);
+            return npc ? `${npc.firstName} ${npc.lastName}` : 'Unknown NPC';
+          })()}
+          onClose={() => setOpenInventoryNPCId(null)}
         />
       )}
     </>

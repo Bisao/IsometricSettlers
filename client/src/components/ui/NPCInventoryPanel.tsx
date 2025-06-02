@@ -159,18 +159,12 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
   });
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-md"
-        onClick={onClose}
-      />
-
-      {/* Panel */}
-      <div className={`relative ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-4xl'} max-h-[90vh] overflow-hidden`}>
-        <div className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl border-4 border-amber-400 shadow-2xl">
+    <div className="fixed inset-0 z-[80] flex">
+      {/* Panel - Left side */}
+      <div className={`${isMobile ? 'w-full' : 'w-1/3 min-w-[400px]'} h-full overflow-hidden`}>
+        <div className="bg-gradient-to-br from-amber-50 to-orange-100 h-full border-r-4 border-amber-400 shadow-2xl flex flex-col">
           {/* Header */}
-          <div className="bg-gradient-to-r from-amber-400 to-orange-400 p-4 rounded-t-xl border-b-4 border-amber-500">
+          <div className="bg-gradient-to-r from-amber-400 to-orange-400 p-4 border-b-4 border-amber-500 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center border-2 border-amber-300">
@@ -190,7 +184,7 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
             </div>
           </div>
 
-          <div className="p-6 max-h-[70vh] overflow-y-auto">
+          <div className="p-6 flex-1 overflow-y-auto">
             {/* Tab Navigation */}
             <div className="flex gap-2 mb-6">
               <button
@@ -242,17 +236,9 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
                     {EQUIPMENT_SLOTS.slice(0, 9).map(renderEquipmentSlot)}
                   </div>
 
-                  {/* Mount and Sort buttons */}
+                  {/* Mount slot */}
                   <div className="mt-4 space-y-2">
                     {EQUIPMENT_SLOTS.slice(9).map(renderEquipmentSlot)}
-                    <div className="flex gap-2">
-                      <button className="flex-1 py-2 bg-gray-600 text-white rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors">
-                        Stock
-                      </button>
-                      <button className="flex-1 py-2 bg-gray-600 text-white rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors">
-                        Sort
-                      </button>
-                    </div>
                   </div>
                 </div>
 
@@ -333,6 +319,12 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
           </div>
         </div>
       </div>
+      
+      {/* Backdrop - Right side for closing */}
+      <div 
+        className="flex-1 bg-black/50 backdrop-blur-sm cursor-pointer"
+        onClick={onClose}
+      />
     </div>
   );
 }

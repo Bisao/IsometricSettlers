@@ -139,6 +139,7 @@ export default function Grid() {
             position={[worldPos.x, 0.05, worldPos.z]}
             isPreview={false}
             isValid={true}
+            buildingId={building.id}
           />
         );
       })}

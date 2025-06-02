@@ -28,7 +28,7 @@ export default function Building({ type, position, isPreview = false, isValid = 
     }
   });
 
-  const handleClick = (event: THREE.Event) => {
+  const handleClick = (event: any) => {
     if (!isPreview && buildingId) {
       event.stopPropagation();
       console.log('Clicked on building:', buildingId);

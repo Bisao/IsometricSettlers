@@ -27,6 +27,8 @@ interface NPC {
   isAutoMode?: boolean;
   aiState?: 'at_home' | 'exploring' | 'returning';
   aiLastStateChange?: Date;
+  aiTargetX?: number;
+  aiTargetZ?: number;
 }
 
 interface BuildingState {
@@ -49,6 +51,8 @@ interface BuildingState {
   setControlledNPC: (npcId: string | null) => void;
   moveNPCToPosition: (npcId: string, gridX: number, gridZ: number) => void;
   setOpenInventoryNPCId: (npcId: string | null) => void;
+  setNPCAutoMode: (npcId: string, autoMode: boolean) => void;
+  updateNPCAI: () => void;
 }
 
 export const useBuilding = create<BuildingState>()(
@@ -171,6 +175,113 @@ export const useBuilding = create<BuildingState>()(
 
     setOpenInventoryNPCId: (npcId) => {
       set({ openInventoryNPCId: npcId });
+    },
+
+    setNPCAutoMode: (npcId, autoMode) => {
+      const { npcs, placedBuildings } = get();
+      const npc = npcs.find(n => n.id === npcId);
+      
+      if (!npc) return;
+
+      // Se desabilitando auto mode, reseta o NPC para casa
+      if (!autoMode) {
+        const building = placedBuildings.find(b => b.id === npc.houseId);
+        if (building) {
+          set({
+            npcs: npcs.map(n => 
+              n.id === npcId 
+                ? { 
+                    ...n, 
+                    isAutoMode: false, 
+                    aiState: 'at_home',
+                    gridX: building.gridX,
+                    gridZ: building.gridZ,
+                    aiTargetX: undefined,
+                    aiTargetZ: undefined,
+                    aiLastStateChange: new Date()
+                  }
+                : n
+            )
+          });
+        }
+      } else {
+        // Se habilitando auto mode, inicia no estado at_home
+        set({
+          npcs: npcs.map(n => 
+            n.id === npcId 
+              ? { 
+                  ...n, 
+                  isAutoMode: true, 
+                  aiState: 'at_home',
+                  aiLastStateChange: new Date()
+                }
+              : n
+          )
+        });
+      }
+    },
+
+    updateNPCAI: () => {
+      const { npcs, placedBuildings } = get();
+      const now = new Date();
+
+      const updatedNPCs = npcs.map(npc => {
+        if (!npc.isAutoMode || npc.isControlled) return npc;
+
+        const building = placedBuildings.find(b => b.id === npc.houseId);
+        if (!building) return npc;
+
+        const timeSinceStateChange = now.getTime() - (npc.aiLastStateChange?.getTime() || 0);
+        
+        switch (npc.aiState) {
+          case 'at_home':
+            // Fica em casa por 10-15 segundos, depois sai para explorar
+            if (timeSinceStateChange > 10000 + Math.random() * 5000) {
+              // Escolhe um ponto aleatório para explorar
+              const targetX = Math.floor(Math.random() * 15);
+              const targetZ = Math.floor(Math.random() * 15);
+              
+              return {
+                ...npc,
+                aiState: 'exploring',
+                aiTargetX: targetX,
+                aiTargetZ: targetZ,
+                aiLastStateChange: now
+              };
+            }
+            break;
+            
+          case 'exploring':
+            // Explora por 15-25 segundos, depois volta para casa
+            if (timeSinceStateChange > 15000 + Math.random() * 10000) {
+              return {
+                ...npc,
+                aiState: 'returning',
+                aiTargetX: building.gridX,
+                aiTargetZ: building.gridZ,
+                aiLastStateChange: now
+              };
+            }
+            break;
+            
+          case 'returning':
+            // Verifica se chegou em casa
+            if (npc.gridX === building.gridX && npc.gridZ === building.gridZ) {
+              return {
+                ...npc,
+                aiState: 'at_home',
+                aiTargetX: undefined,
+                aiTargetZ: undefined,
+                aiLastStateChange: now
+              };
+            }
+            break;
+        }
+
+        return npc;
+      });
+
+      set({ npcs: updatedNPCs });
     }
   }))
 );

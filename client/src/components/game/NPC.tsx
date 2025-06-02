@@ -392,7 +392,7 @@ export default function NPC({
       {showVision && (
         <mesh 
           position={[0, 0.1, 0]} 
-          rotation={[-Math.PI / 2, 0, newRotation]}
+          rotation={[-Math.PI / 2, 0, currentRotation]}
         >
           <primitive object={visionConeGeometry} />
           <meshLambertMaterial 

@@ -8,7 +8,7 @@ interface UseGridPlacementProps {
   tileSize: number;
   camera: THREE.Camera;
   onHover: (gridPos: { x: number; z: number } | null) => void;
-  onPlace: (gridX: number, gridZ: number) => void;
+  onPlace: (gridX: number, gridZ: number, isRightClick?: boolean) => void;
 }
 
 export function useGridPlacement({ 
@@ -57,7 +57,7 @@ export function useGridPlacement({
     const gridPos = getGridPosition(event);
     
     if (gridPos) {
-      onPlace(gridPos.x, gridPos.z);
+      onPlace(gridPos.x, gridPos.z, false); // Left-click
     }
   }, [getGridPosition, onPlace]);
 
@@ -66,7 +66,7 @@ export function useGridPlacement({
     const gridPos = getGridPosition(event);
     
     if (gridPos) {
-      onPlace(gridPos.x, gridPos.z, true); // Pass true to indicate right-click
+      onPlace(gridPos.x, gridPos.z, true); // Right-click
     }
   }, [getGridPosition, onPlace]);
 

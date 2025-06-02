@@ -39,7 +39,17 @@ export default function Grid() {
     tileSize: TILE_SIZE,
     camera,
     onHover: setPreviewPosition,
-    onPlace: placeBuilding
+    onPlace: (gridX: number, gridZ: number, isRightClick?: boolean) => {
+      if (controlledNPCId && isRightClick) {
+        // Only right-click moves the controlled NPC
+        moveNPCToPosition(controlledNPCId, gridX, gridZ);
+        console.log(`Moving controlled NPC to grid position (${gridX}, ${gridZ})`);
+      } else if (!controlledNPCId && !isRightClick) {
+        // Only left-click places buildings when no NPC is controlled
+        placeBuilding(gridX, gridZ);
+      }
+      // Do nothing for left-click when NPC is controlled or right-click when no NPC is controlled
+    }
   });
 
   // Generate grid tiles
@@ -114,15 +124,7 @@ export default function Grid() {
     }
   }, [selectedBuilding, clearSelection]);
 
-  const handleGridClick = (gridX: number, gridZ: number) => {
-    if (controlledNPCId) {
-      // Move controlled NPC to clicked position
-      moveNPCToPosition(controlledNPCId, gridX, gridZ);
-      console.log(`Moving controlled NPC to grid position (${gridX}, ${gridZ})`);
-    } else if (selectedBuilding) {
-      placeBuilding(gridX, gridZ);
-    }
-  };
+  
 
   // Ensure grid ref stability and prevent null references
   useEffect(() => {
@@ -138,31 +140,7 @@ export default function Grid() {
         position={[GRID_SIZE/2 - 0.5, -0.1, GRID_SIZE/2 - 0.5]} 
         receiveShadow
         onPointerMove={controlledNPCId ? undefined : handlePointerMove}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleClick(e);
-          // Get grid coordinates from click
-          try {
-            if (gridRef.current && raycaster && raycaster.intersectObjects) {
-              // Ensure all objects in the group are valid before raycasting
-              const validObjects = gridRef.current.children.filter(child => 
-                child && child.type && (child.type === 'Mesh' || child.type === 'Group')
-              );
-
-              if (validObjects.length > 0) {
-                const intersections = raycaster.intersectObjects(validObjects, true);
-                const intersection = intersections[0];
-
-                if (intersection && intersection.point) {
-                  const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
-                  handleGridClick(gridPos.x, gridPos.z);
-                }
-              }
-            }
-          } catch (error) {
-            console.error('Error in grid click handler:', error);
-          }
-        }}
+        onClick={handleClick}
         onContextMenu={handleContextMenu}
       >
         <boxGeometry args={[GRID_SIZE, 0.1, GRID_SIZE]} />

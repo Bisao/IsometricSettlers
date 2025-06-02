@@ -128,13 +128,8 @@ export default function Grid() {
   useEffect(() => {
     if (gridRef.current) {
       console.log('Grid ref is available with', gridRef.current.children.length, 'children');
-      
-      // Force a re-render to ensure all Three.js objects are properly initialized
-      if (gl && gl.render) {
-        gl.render();
-      }
     }
-  }, [npcs, placedBuildings, gl]);
+  }, [npcs, placedBuildings]);
 
   return (
     <group ref={gridRef}>

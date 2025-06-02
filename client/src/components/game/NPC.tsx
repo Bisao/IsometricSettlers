@@ -121,7 +121,6 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
         color={isSelected ? "#FFD700" : "#FFFFFF"}
         anchorX="center"
         anchorY="middle"
-        font="/fonts/inter.json"
         outlineWidth={0.01}
         outlineColor="#000000"
       >

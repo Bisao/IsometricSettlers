@@ -1,18 +1,30 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 
 const buildings = [
-  { name: "House", color: "#8B4513", emoji: "🏠" },
-  { name: "Shop", color: "#FF6B6B", emoji: "🏪" },
-  { name: "Farm", color: "#4ECDC4", emoji: "🚜" },
-  { name: "Factory", color: "#45B7D1", emoji: "🏭" },
+  { 
+    id: "house",
+    name: "Casa", 
+    type: "house" as const,
+    icon: "🏠",
+    description: "Casa residencial"
+  }
 ];
 
 export default function BuildingPanel() {
-  const { selectedBuilding, setSelectedBuilding } = useBuilding();
+  const { selectedBuilding, selectBuilding, clearSelection } = useBuilding();
   const isMobile = useIsMobile();
+
+  const handleBuildingSelect = (building: typeof buildings[0]) => {
+    if (selectedBuilding?.id === building.id) {
+      clearSelection();
+    } else {
+      selectBuilding(building);
+    }
+  };
 
   return (
     <div className={`absolute z-40 ${isMobile 
@@ -26,20 +38,20 @@ export default function BuildingPanel() {
           </CardTitle>
         </CardHeader>
         <CardContent className={`${isMobile ? 'space-y-1' : 'space-y-2'}`}>
-          <div className={`${isMobile ? 'grid grid-cols-2 gap-2' : 'space-y-2'}`}>
+          <div className={`${isMobile ? 'grid grid-cols-1 gap-2' : 'space-y-2'}`}>
             {buildings.map((building) => (
               <Button
-                key={building.name}
-                onClick={() => setSelectedBuilding(selectedBuilding === building.name ? null : building.name)}
-                variant={selectedBuilding === building.name ? "default" : "outline"}
+                key={building.id}
+                onClick={() => handleBuildingSelect(building)}
+                variant={selectedBuilding?.id === building.id ? "default" : "outline"}
                 className={`${isMobile ? 'w-full h-12 text-xs' : 'w-full'} justify-start text-left ${
-                  selectedBuilding === building.name 
+                  selectedBuilding?.id === building.id 
                     ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                     : 'hover:bg-gray-100'
                 }`}
               >
                 <span className={`${isMobile ? 'mr-1 text-base' : 'mr-2 text-lg'}`}>
-                  {building.emoji}
+                  {building.icon}
                 </span>
                 <span className={isMobile ? 'text-xs' : ''}>{building.name}</span>
               </Button>

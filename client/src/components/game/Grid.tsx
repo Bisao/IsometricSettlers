@@ -124,6 +124,13 @@ export default function Grid() {
     }
   };
 
+  // Ensure grid ref stability
+  useEffect(() => {
+    if (gridRef.current) {
+      console.log('Grid ref is available');
+    }
+  }, [npcs, placedBuildings]);
+
   return (
     <group ref={gridRef}>
       {/* Ground plane */}
@@ -132,13 +139,18 @@ export default function Grid() {
         receiveShadow
         onPointerMove={handlePointerMove}
         onClick={(e) => {
+          e.stopPropagation();
           handleClick(e);
           // Get grid coordinates from click
-          if (gridRef.current) {
-            const intersection = raycaster.intersectObjects([gridRef.current], true)[0];
-            if (intersection) {
-              const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
-              handleGridClick(gridPos.x, gridPos.z);
+          if (gridRef.current && gridRef.current.children && gridRef.current.children.length > 0) {
+            try {
+              const intersection = raycaster.intersectObjects([gridRef.current], true)[0];
+              if (intersection && intersection.point) {
+                const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
+                handleGridClick(gridPos.x, gridPos.z);
+              }
+            } catch (error) {
+              console.error('Error in grid click handler:', error);
             }
           }
         }}

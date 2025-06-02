@@ -36,7 +36,7 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
         />
 
         {/* Panel */}
-        <div className={`relative ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'} max-h-[90vh] overflow-y-auto`}></div>
+        <div className={`relative ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'} max-h-[90vh] overflow-y-auto`}>
           <FantasyPanel title="🏠 Detalhes da Estrutura" onClose={onClose}>
             <div className="space-y-4">
               {/* Building Info */}

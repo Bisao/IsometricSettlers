@@ -33,6 +33,11 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   // Walking animation state
   const [isWalking, setIsWalking] = useState(false);
   const walkCycleRef = useRef(0);
+  
+  // Direction tracking for looking where walking
+  const [movementDirection, setMovementDirection] = useState<[number, number]>([0, 0]);
+  const [targetRotation, setTargetRotation] = useState(0);
+  const [currentRotation, setCurrentRotation] = useState(0);
 
   // Update target position when position prop changes
   useEffect(() => {
@@ -51,10 +56,22 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
                       Math.abs(newTargetPos[2] - targetPosition[2]) > 0.01;
     
     if (hasChanged) {
+      // Calculate movement direction
+      const deltaX = newTargetPos[0] - currentPosition[0];
+      const deltaZ = newTargetPos[2] - currentPosition[2];
+      
+      if (Math.abs(deltaX) > 0.01 || Math.abs(deltaZ) > 0.01) {
+        setMovementDirection([deltaX, deltaZ]);
+        
+        // Calculate target rotation based on movement direction
+        const angle = Math.atan2(deltaX, deltaZ);
+        setTargetRotation(angle);
+      }
+      
       setTargetPosition(newTargetPos);
       setIsWalking(true);
     }
-  }, [position, targetPosition]);
+  }, [position, targetPosition, currentPosition]);
 
   // Generate consistent appearance based on name
   const nameHash = `${firstName || ''}${lastName || ''}`.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -84,6 +101,11 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
       THREE.MathUtils.lerp(currentPosition[2], targetPosition[2], lerpSpeed * delta)
     ];
     
+    // Smooth rotation interpolation
+    const rotationSpeed = 8.0;
+    const newRotation = THREE.MathUtils.lerp(currentRotation, targetRotation, rotationSpeed * delta);
+    setCurrentRotation(newRotation);
+    
     // Check if we've reached the target
     const distance = Math.sqrt(
       Math.pow(newPos[0] - targetPosition[0], 2) + 
@@ -108,18 +130,20 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
       // Bob up and down while walking
       npcRef.current.position.y = newPos[1] + Math.sin(walkCycleRef.current) * 0.05;
       
-      // Rotate body slightly side to side
-      npcRef.current.rotation.y = Math.sin(walkCycleRef.current * 0.5) * 0.1;
+      // Main body rotation to face movement direction + slight sway
+      npcRef.current.rotation.y = newRotation + Math.sin(walkCycleRef.current * 0.5) * 0.08;
       
-      // Enhanced head movement while walking
+      // Enhanced head movement while walking - look ahead in movement direction
       if (headRef.current) {
-        headRef.current.rotation.y = Math.sin(walkCycleRef.current * 0.7) * 0.3;
-        headRef.current.rotation.x = Math.sin(walkCycleRef.current * 0.8) * 0.1;
+        headRef.current.rotation.y = Math.sin(walkCycleRef.current * 0.7) * 0.2;
+        headRef.current.rotation.x = Math.sin(walkCycleRef.current * 0.8) * 0.08;
       }
     } else {
       // Idle animations
       npcRef.current.position.y = newPos[1] + Math.sin(state.clock.elapsedTime * 1.5) * 0.02;
-      npcRef.current.rotation.y = 0;
+      
+      // Keep facing the last movement direction when idle
+      npcRef.current.rotation.y = newRotation;
       
       // Gentle head movement when idle
       if (headRef.current) {

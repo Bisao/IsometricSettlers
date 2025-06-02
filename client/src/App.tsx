@@ -16,15 +16,13 @@ import { useEffect, useState } from "react";
 const queryClient = new QueryClient();
 
 function App() {
-  const { initializeGame } = useGame();
   const { initializeAudio } = useAudio();
   const isMobile = useIsMobile();
   const { selectedBuildingId, setSelectedBuildingId } = useBuilding();
 
   useEffect(() => {
-    initializeGame();
     initializeAudio();
-  }, [initializeGame, initializeAudio]);
+  }, [initializeAudio]);
 
   useEffect(() => {
     // Prevent zoom on mobile

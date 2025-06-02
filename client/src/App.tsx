@@ -1,63 +1,67 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import GameScene from "./components/game/GameScene";
 import BuildingPanel from "./components/ui/BuildingPanel";
-import BuildingDetailsPanel from "./components/ui/BuildingDetailsPanel";
-import { useBuilding } from "./lib/stores/useBuilding";
-import "@fontsource/inter";
-import "./index.css";
+import { useGame } from "./lib/stores/useGame";
+import { useAudio } from "./lib/stores/useAudio";
+import { useIsMobile } from "./hooks/use-is-mobile";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 function App() {
-  const { selectedBuildingId, setSelectedBuildingId } = useBuilding();
+  const { initializeGame } = useGame();
+  const { initializeAudio } = useAudio();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    initializeGame();
+    initializeAudio();
+  }, [initializeGame, initializeAudio]);
+
+  useEffect(() => {
+    // Prevent zoom on mobile
+    if (isMobile) {
+      const handleTouchStart = (e: TouchEvent) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        if (e.touches.length > 1) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('touchstart', handleTouchStart, { passive: false });
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+      return () => {
+        document.removeEventListener('touchstart', handleTouchStart);
+        document.removeEventListener('touchmove', handleTouchMove);
+      };
+    }
+  }, [isMobile]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="w-full h-screen relative overflow-hidden bg-gradient-to-b from-sky-200 to-sky-400">
-        {/* 3D Canvas */}
+      <div className="w-full h-full relative overflow-hidden">
         <Canvas
+          camera={{ 
+            position: [10, 10, 10], 
+            fov: isMobile ? 60 : 45
+          }}
           shadows
-          camera={{
-            position: [10, 10, 10],
-            fov: 45,
-            near: 0.1,
-            far: 1000
+          className="w-full h-full touch-none"
+          gl={{ 
+            antialias: !isMobile, // Disable antialiasing on mobile for better performance
+            powerPreference: isMobile ? "low-power" : "high-performance"
           }}
-          gl={{
-            antialias: true,
-            powerPreference: "high-performance"
-          }}
-          className="w-full h-full"
         >
-          <Suspense fallback={null}>
-            <GameScene />
-          </Suspense>
+          <GameScene />
         </Canvas>
-
-        {/* Building Panel UI */}
         <BuildingPanel />
-
-        {/* Building Details Panel */}
-        {selectedBuildingId && (
-          <BuildingDetailsPanel 
-            buildingId={selectedBuildingId}
-            onClose={() => setSelectedBuildingId(null)}
-          />
-        )}
-
-        {/* Instructions */}
-        <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white p-4 rounded-lg max-w-sm">
-          <h3 className="font-bold mb-2">Instructions</h3>
-          <ul className="text-sm space-y-1">
-            <li>• Click the Building Panel to select structures</li>
-            <li>• Move mouse over grid to preview placement</li>
-            <li>• Click on a grid tile to place building</li>
-            <li>• Click on a placed building to view details</li>
-            <li>• Right-click or ESC to cancel selection</li>
-          </ul>
-        </div>
       </div>
     </QueryClientProvider>
   );

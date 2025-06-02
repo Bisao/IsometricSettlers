@@ -1,7 +1,8 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
+import { gridToWorld } from "../../lib/gameUtils";
 
 interface NPCProps {
   position: [number, number, number];
@@ -15,6 +16,45 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   const npcRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Mesh>(null);
   const eyesRef = useRef<THREE.Group>(null);
+  
+  // Current world position for smooth movement
+  const [currentPosition, setCurrentPosition] = useState<[number, number, number]>(() => {
+    // Convert grid position to world position if needed
+    if (position[1] === 0) {
+      const worldPos = gridToWorld(position[0], position[2], 1);
+      return [worldPos.x, 0, worldPos.z];
+    }
+    return position;
+  });
+  
+  // Target position for interpolation
+  const [targetPosition, setTargetPosition] = useState<[number, number, number]>(currentPosition);
+  
+  // Walking animation state
+  const [isWalking, setIsWalking] = useState(false);
+  const walkCycleRef = useRef(0);
+
+  // Update target position when position prop changes
+  useEffect(() => {
+    let newTargetPos: [number, number, number];
+    
+    if (position[1] === 0) {
+      // Convert grid position to world position (center of tile)
+      const worldPos = gridToWorld(position[0], position[2], 1);
+      newTargetPos = [worldPos.x, 0, worldPos.z];
+    } else {
+      newTargetPos = position;
+    }
+    
+    // Check if position actually changed
+    const hasChanged = Math.abs(newTargetPos[0] - targetPosition[0]) > 0.01 || 
+                      Math.abs(newTargetPos[2] - targetPosition[2]) > 0.01;
+    
+    if (hasChanged) {
+      setTargetPosition(newTargetPos);
+      setIsWalking(true);
+    }
+  }, [position, targetPosition]);
 
   // Generate consistent appearance based on name
   const nameHash = `${firstName || ''}${lastName || ''}`.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -32,15 +72,63 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   const hasGlasses = nameHash % 4 === 0;
   const hasHat = nameHash % 5 === 0;
 
-  // Simple idle animations (without breathing)
-  useFrame((state) => {
-    // Head movement
-    if (headRef.current) {
-      headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.2;
-      headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.6) * 0.05;
+  // Animation and movement system
+  useFrame((state, delta) => {
+    if (!npcRef.current) return;
+    
+    // Smooth movement interpolation
+    const lerpSpeed = 3.0; // Movement speed
+    const newPos: [number, number, number] = [
+      THREE.MathUtils.lerp(currentPosition[0], targetPosition[0], lerpSpeed * delta),
+      currentPosition[1],
+      THREE.MathUtils.lerp(currentPosition[2], targetPosition[2], lerpSpeed * delta)
+    ];
+    
+    // Check if we've reached the target
+    const distance = Math.sqrt(
+      Math.pow(newPos[0] - targetPosition[0], 2) + 
+      Math.pow(newPos[2] - targetPosition[2], 2)
+    );
+    
+    if (distance < 0.05) {
+      // Snap to target and stop walking
+      newPos[0] = targetPosition[0];
+      newPos[2] = targetPosition[2];
+      setIsWalking(false);
+      walkCycleRef.current = 0;
+    }
+    
+    setCurrentPosition(newPos);
+    npcRef.current.position.set(newPos[0], newPos[1], newPos[2]);
+    
+    // Walking animation
+    if (isWalking) {
+      walkCycleRef.current += delta * 8; // Walking speed
+      
+      // Bob up and down while walking
+      npcRef.current.position.y = newPos[1] + Math.sin(walkCycleRef.current) * 0.05;
+      
+      // Rotate body slightly side to side
+      npcRef.current.rotation.y = Math.sin(walkCycleRef.current * 0.5) * 0.1;
+      
+      // Enhanced head movement while walking
+      if (headRef.current) {
+        headRef.current.rotation.y = Math.sin(walkCycleRef.current * 0.7) * 0.3;
+        headRef.current.rotation.x = Math.sin(walkCycleRef.current * 0.8) * 0.1;
+      }
+    } else {
+      // Idle animations
+      npcRef.current.position.y = newPos[1] + Math.sin(state.clock.elapsedTime * 1.5) * 0.02;
+      npcRef.current.rotation.y = 0;
+      
+      // Gentle head movement when idle
+      if (headRef.current) {
+        headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.15;
+        headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.6) * 0.05;
+      }
     }
 
-    // Eye blinking
+    // Eye blinking (always active)
     if (eyesRef.current) {
       const blinkTime = Math.sin(state.clock.elapsedTime * 0.1) > 0.95 ? 0.3 : 1;
       eyesRef.current.scale.y = blinkTime;
@@ -48,7 +136,7 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   });
 
   return (
-    <group ref={npcRef} position={position}>
+    <group ref={npcRef} position={currentPosition}>
       {/* Enhanced shadow */}
       <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.35, 16]} />

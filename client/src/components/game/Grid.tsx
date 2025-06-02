@@ -195,21 +195,21 @@ export default function Grid() {
         const building = placedBuildings.find(b => b.id === npc.houseId);
         if (!building) return null;
 
-        // Use controlled position or default house position
-        let npcPos: [number, number, number];
+        // Use controlled position or default house position (in grid coordinates)
+        let npcGridPos: [number, number, number];
 
         if (npc.isControlled && npc.gridX !== undefined && npc.gridZ !== undefined) {
-          // Use controlled position
-          npcPos = [npc.gridX, 0, npc.gridZ];
+          // Use controlled position (grid coordinates)
+          npcGridPos = [npc.gridX, 0, npc.gridZ];
         } else {
-          // Default position - spawn on the same tile as the house
-          npcPos = [building.gridX, 0, building.gridZ];
+          // Default position - spawn on the same tile as the house (grid coordinates)
+          npcGridPos = [building.gridX, 0, building.gridZ];
         }
 
         return (
           <NPC
             key={npc.id}
-            position={npcPos}
+            position={npcGridPos}
             firstName={npc.firstName}
             lastName={npc.lastName}
             isSelected={selectedBuildingId === npc.houseId}

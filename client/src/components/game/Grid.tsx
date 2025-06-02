@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -99,7 +99,7 @@ export default function Grid() {
   }, [selectedBuilding, previewPosition, placedBuildings]);
 
   // Handle escape key to cancel selection
-  useFrame(() => {
+  useEffect(() => {
     if (selectedBuilding) {
       const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
@@ -110,7 +110,7 @@ export default function Grid() {
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
-  });
+  }, [selectedBuilding, clearSelection]);
 
   return (
     <group ref={gridRef}>

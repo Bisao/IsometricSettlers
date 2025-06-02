@@ -137,7 +137,7 @@ export default function Grid() {
       <mesh 
         position={[GRID_SIZE/2 - 0.5, -0.1, GRID_SIZE/2 - 0.5]} 
         receiveShadow
-        onPointerMove={handlePointerMove}
+        onPointerMove={controlledNPCId ? undefined : handlePointerMove}
         onClick={(e) => {
           e.stopPropagation();
           handleClick(e);

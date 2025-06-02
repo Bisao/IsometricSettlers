@@ -46,7 +46,7 @@ export default function BuildingPanel({ isOpen, onClose }: BuildingPanelProps) {
       <div className={`relative ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'} max-h-[90vh] overflow-y-auto`}>
         <FantasyPanel title="🏗️ Painel de Estruturas" onClose={onClose}>
           <div className="space-y-4">
-            <p className="text-amber-800 text-sm font-medium text-center">
+            <p className="text-gray-800 text-sm font-medium text-center">
               Selecione uma estrutura para posicionar no mundo
             </p>
             

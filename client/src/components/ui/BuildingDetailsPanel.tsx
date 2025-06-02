@@ -40,7 +40,7 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
           <FantasyPanel title="🏠 Detalhes da Estrutura" onClose={onClose}>
             <div className="space-y-4">
               {/* Building Info */}
-              <div className="text-center bg-gradient-to-br from-amber-100 to-orange-100 p-4 rounded-xl border border-amber-200">
+              <div className="text-center bg-gradient-to-br from-gray-100 to-slate-100 p-4 rounded-xl border border-gray-200">
                 <div className="text-5xl mb-3 animate-pulse">🏠</div>
                 <h3 className="text-2xl font-bold text-amber-900 mb-2">Casa Residencial</h3>
                 <div className="inline-flex items-center gap-2 bg-amber-200 px-3 py-1 rounded-full">

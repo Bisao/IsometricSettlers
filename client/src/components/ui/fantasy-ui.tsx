@@ -12,8 +12,8 @@ interface FantasyPanelProps {
 export function FantasyPanel({ children, title, className = "", onClose }: FantasyPanelProps) {
   return (
     <div className={`
-      bg-gradient-to-br from-amber-50 via-white to-amber-100 
-      border-2 border-amber-300 
+      bg-gradient-to-br from-gray-50 via-white to-gray-100 
+      border-2 border-gray-300 
       rounded-2xl 
       shadow-2xl 
       overflow-hidden
@@ -21,13 +21,13 @@ export function FantasyPanel({ children, title, className = "", onClose }: Fanta
       ${className}
     `}>
       {title && (
-        <div className="bg-gradient-to-r from-amber-600 to-amber-700 text-white p-4 relative">
+        <div className="bg-gradient-to-r from-gray-600 to-gray-700 text-white p-4 relative">
           <h2 className="text-lg font-bold text-center pr-8">{title}</h2>
           {onClose && (
             <button
               onClick={onClose}
               className="absolute right-3 top-1/2 -translate-y-1/2 
-                       text-white hover:text-amber-200 
+                       text-white hover:text-gray-200 
                        transition-colors duration-200
                        p-1 rounded-full hover:bg-white/20"
             >
@@ -69,10 +69,10 @@ export function FantasyButton({
 
   const variants = {
     primary: `
-      bg-gradient-to-r from-blue-500 to-blue-600 
-      hover:from-blue-600 hover:to-blue-700
-      text-white border-2 border-blue-400
-      focus:ring-blue-500
+      bg-gradient-to-r from-slate-500 to-slate-600 
+      hover:from-slate-600 hover:to-slate-700
+      text-white border-2 border-slate-400
+      focus:ring-slate-500
     `,
     secondary: `
       bg-gradient-to-r from-gray-200 to-gray-300 
@@ -81,16 +81,16 @@ export function FantasyButton({
       focus:ring-gray-500
     `,
     success: `
-      bg-gradient-to-r from-green-500 to-green-600 
-      hover:from-green-600 hover:to-green-700
-      text-white border-2 border-green-400
-      focus:ring-green-500
+      bg-gradient-to-r from-emerald-500 to-emerald-600 
+      hover:from-emerald-600 hover:to-emerald-700
+      text-white border-2 border-emerald-400
+      focus:ring-emerald-500
     `,
     danger: `
-      bg-gradient-to-r from-red-500 to-red-600 
-      hover:from-red-600 hover:to-red-700
-      text-white border-2 border-red-400
-      focus:ring-red-500
+      bg-gradient-to-r from-rose-500 to-rose-600 
+      hover:from-rose-600 hover:to-rose-700
+      text-white border-2 border-rose-400
+      focus:ring-rose-500
     `
   };
 

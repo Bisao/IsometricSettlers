@@ -5,7 +5,7 @@ import { useBuilding } from "../../lib/stores/useBuilding";
 import { gridToWorld } from "../../lib/gameUtils";
 
 export default function Camera() {
-  const { camera } = useThree();
+  const { camera, gl } = useThree();
   const { controlledNPCId, npcs, placedBuildings } = useBuilding();
   
   // Camera state for smooth transitions
@@ -13,6 +13,11 @@ export default function Camera() {
   const defaultLookAt = useRef(new THREE.Vector3(7, 0, 7));
   const currentLookAt = useRef(new THREE.Vector3(7, 0, 7));
   const isFollowingMode = useRef(false);
+  
+  // Isometric camera controls for NPC mode
+  const zoomLevel = useRef(8); // Distance from target
+  const minZoom = useRef(3);
+  const maxZoom = useRef(15);
 
   // Set up initial camera
   useEffect(() => {
@@ -38,6 +43,33 @@ export default function Camera() {
       isFollowingMode.current = false;
     }
   }, [controlledNPCId]);
+
+  // Mouse wheel zoom handler for isometric view
+  useEffect(() => {
+    if (!isFollowingMode.current || !controlledNPCId) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      
+      const zoomSpeed = 0.5;
+      const deltaY = event.deltaY;
+      
+      if (deltaY > 0) {
+        // Zoom out
+        zoomLevel.current = Math.min(zoomLevel.current + zoomSpeed, maxZoom.current);
+      } else {
+        // Zoom in
+        zoomLevel.current = Math.max(zoomLevel.current - zoomSpeed, minZoom.current);
+      }
+    };
+
+    const canvas = gl.domElement;
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      canvas.removeEventListener('wheel', handleWheel);
+    };
+  }, [controlledNPCId, gl.domElement]);
 
   // Camera animation loop
   useFrame((state, delta) => {
@@ -68,15 +100,22 @@ export default function Camera() {
           }
         }
 
-        // Calculate follow camera position (behind and above the NPC)
-        const followOffset = new THREE.Vector3(0, 4, 3); // Behind, above, and slightly back
-        const targetCameraPos = npcWorldPos.clone().add(followOffset);
+        // Calculate isometric camera position
+        // Isometric angle: 45 degrees on both X and Y axes
+        const distance = zoomLevel.current;
+        const angle = Math.PI / 4; // 45 degrees
+        
+        const offsetX = distance * Math.cos(angle);
+        const offsetY = distance * Math.sin(angle);
+        const offsetZ = distance * Math.cos(angle);
+        
+        const targetCameraPos = npcWorldPos.clone().add(new THREE.Vector3(offsetX, offsetY, offsetZ));
         
         // Smooth camera position interpolation
         camera.position.lerp(targetCameraPos, lerpSpeed * delta);
         
-        // Smooth look-at interpolation
-        const targetLookAt = npcWorldPos.clone().add(new THREE.Vector3(0, 1, 0)); // Look slightly above NPC
+        // Smooth look-at interpolation (look at NPC position)
+        const targetLookAt = npcWorldPos.clone().add(new THREE.Vector3(0, 0.5, 0)); // Look slightly above ground
         currentLookAt.current.lerp(targetLookAt, lerpSpeed * delta);
         camera.lookAt(currentLookAt.current);
       }

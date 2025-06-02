@@ -124,12 +124,17 @@ export default function Grid() {
     }
   };
 
-  // Ensure grid ref stability
+  // Ensure grid ref stability and prevent null references
   useEffect(() => {
     if (gridRef.current) {
-      console.log('Grid ref is available');
+      console.log('Grid ref is available with', gridRef.current.children.length, 'children');
+      
+      // Force a re-render to ensure all Three.js objects are properly initialized
+      if (gl && gl.render) {
+        gl.render();
+      }
     }
-  }, [npcs, placedBuildings]);
+  }, [npcs, placedBuildings, gl]);
 
   return (
     <group ref={gridRef}>
@@ -142,16 +147,25 @@ export default function Grid() {
           e.stopPropagation();
           handleClick(e);
           // Get grid coordinates from click
-          if (gridRef.current && gridRef.current.children && gridRef.current.children.length > 0) {
-            try {
-              const intersection = raycaster.intersectObjects([gridRef.current], true)[0];
-              if (intersection && intersection.point) {
-                const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
-                handleGridClick(gridPos.x, gridPos.z);
+          try {
+            if (gridRef.current && raycaster && raycaster.intersectObjects) {
+              // Ensure all objects in the group are valid before raycasting
+              const validObjects = gridRef.current.children.filter(child => 
+                child && child.type && (child.type === 'Mesh' || child.type === 'Group')
+              );
+              
+              if (validObjects.length > 0) {
+                const intersections = raycaster.intersectObjects(validObjects, true);
+                const intersection = intersections[0];
+                
+                if (intersection && intersection.point) {
+                  const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
+                  handleGridClick(gridPos.x, gridPos.z);
+                }
               }
-            } catch (error) {
-              console.error('Error in grid click handler:', error);
             }
+          } catch (error) {
+            console.error('Error in grid click handler:', error);
           }
         }}
         onContextMenu={(e) => {

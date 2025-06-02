@@ -5,11 +5,19 @@ import Grid from "./Grid";
 import Camera from "./Camera";
 import { useAudio } from "../../lib/stores/useAudio";
 import { useNPCAI } from "../../hooks/useNPCAI";
+import BuildingPanel from "../ui/BuildingPanel";
+import BuildingDetailsPanel from "../ui/BuildingDetailsPanel";
+import SettingsPanel from "../ui/SettingsPanel";
+import CombatHUD from "../ui/CombatHUD";
+import { useBuilding } from "../../lib/stores/useBuilding";
+import { useMode } from "../../lib/stores/useMode";
 
 export default function GameScene() {
   useAudio();
   useNPCAI();
   const sceneRef = useRef<THREE.Group>(null);
+  const { placedBuildings, selectedBuildingId, controlledNPCId, npcs } = useBuilding();
+  const { mode } = useMode();
 
   // Prevent default browser context menu on right-click
   useEffect(() => {
@@ -27,39 +35,67 @@ export default function GameScene() {
   }, []);
 
   return (
-    <group ref={sceneRef}>
-      {/* Lighting setup */}
-      <ambientLight intensity={0.4} />
-      <directionalLight
-        position={[10, 10, 5]}
-        intensity={1}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-camera-far={50}
-        shadow-camera-left={-20}
-        shadow-camera-right={20}
-        shadow-camera-top={20}
-        shadow-camera-bottom={-20}
-      />
+    <div>
+      <group ref={sceneRef}>
+        {/* Lighting setup */}
+        <ambientLight intensity={0.4} />
+        <directionalLight
+          position={[10, 10, 5]}
+          intensity={1}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-far={50}
+          shadow-camera-left={-20}
+          shadow-camera-right={20}
+          shadow-camera-top={20}
+          shadow-camera-bottom={-20}
+        />
 
-      {/* Camera controller */}
-      <Camera />
+        {/* Camera controller */}
+        <Camera />
 
-      {/* Game Grid */}
-      <Grid />
+        {/* Game Grid */}
+        <Grid />
 
-      {/* Orbit controls for camera movement */}
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2.5}
-        minDistance={5}
-        maxDistance={30}
-        target={[0, 0, 0]}
-      />
-    </group>
+        {/* Orbit controls for camera movement */}
+        <OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          minPolarAngle={Math.PI / 6}
+          maxPolarAngle={Math.PI / 2.5}
+          minDistance={5}
+          maxDistance={30}
+          target={[0, 0, 0]}
+        />
+      </group>
+
+      {/* UI Panels */}
+      <BuildingPanel />
+
+      {selectedBuildingId && (
+        <BuildingDetailsPanel buildingId={selectedBuildingId} />
+      )}
+
+      <SettingsPanel />
+
+      {/* Combat HUD - only show when NPC is controlled or in auto mode and in combat */}
+      {controlledNPCId && (
+        <CombatHUD 
+          npcId={controlledNPCId}
+          isVisible={true}
+        />
+      )}
+
+      {/* Show combat HUD for NPCs in auto mode that are in combat */}
+      {npcs.filter(npc => npc.isAutoMode && npc.isInCombat).map(npc => (
+        <CombatHUD 
+          key={npc.id}
+          npcId={npc.id}
+          isVisible={true}
+        />
+      ))}
+    </div>
   );
 }

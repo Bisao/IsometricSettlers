@@ -4,9 +4,12 @@ import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import Building from "./Building";
 import NPC from "./NPC";
+import Wolf from "./Wolf";
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useGridPlacement } from "../../hooks/useGridPlacement";
 import { worldToGrid, gridToWorld } from "../../lib/gameUtils";
+import { ThreeEvent } from "@react-three/fiber";
+import { MouseEvent } from "react";
 
 const GRID_SIZE = 15;
 const TILE_SIZE = 1;
@@ -15,17 +18,17 @@ export default function Grid() {
   const gridRef = useRef<THREE.Group>(null);
   const { camera, raycaster, mouse, gl } = useThree();
 
-  const {
-    selectedBuilding,
-    placedBuildings,
-    previewPosition,
-    npcs,
+  const { 
+    placedBuildings, 
+    npcs, 
     selectedBuildingId,
     controlledNPCId,
-    setPreviewPosition,
-    placeBuilding,
-    clearSelection,
-    moveNPCToPosition
+    wolves,
+    selectedWolfId,
+    selectWolf,
+    attackWolf,
+    wolfAttackNPC,
+    removeWolf
   } = useBuilding();
 
   // Configure grass texture
@@ -124,14 +127,53 @@ export default function Grid() {
     }
   }, [selectedBuilding, clearSelection]);
 
+  const handleGridClick = (event: ThreeEvent<MouseEvent>) => {
+    if (!selectedBuilding) return;
 
+    event.stopPropagation();
+    const intersectedObject = event.intersections[0]?.object;
+
+    if (intersectedObject?.userData?.gridX !== undefined && intersectedObject?.userData?.gridZ !== undefined) {
+      const gridX = intersectedObject.userData.gridX;
+      const gridZ = intersectedObject.userData.gridZ;
+
+      placeBuilding(gridX, gridZ);
+    }
+  };
+
+  const handleWolfClick = (event: ThreeEvent<MouseEvent>, wolfId: string) => {
+    event.stopPropagation();
+    selectWolf(wolfId);
+  };
+
+  const handleWolfAttack = (wolfId: string) => {
+    if (selectedWolfId === wolfId) {
+      attackWolf(wolfId, 15);
+      console.log(`Attacked wolf ${wolfId}!`);
+    }
+  };
+
+  const calculateDistance = (x1: number, z1: number, x2: number, z2: number) => {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(z2 - z1, 2));
+  };
+
+  const getNearbyNPCs = (wolfX: number, wolfZ: number) => {
+    return npcs
+      .filter(npc => npc.gridX !== undefined && npc.gridZ !== undefined)
+      .map(npc => ({
+        id: npc.id,
+        distance: calculateDistance(wolfX, wolfZ, npc.gridX!, npc.gridZ!)
+      }))
+      .filter(npc => npc.distance <= 3)
+      .sort((a, b) => a.distance - b.distance);
+  };
 
   // Ensure grid ref stability and prevent null references
   useEffect(() => {
     if (gridRef.current) {
       console.log('Grid ref is available with', gridRef.current.children.length, 'children');
     }
-  }, [npcs, placedBuildings]);
+  }, [npcs, placedBuildings, wolves]);
 
   return (
     <group ref={gridRef}>
@@ -188,6 +230,25 @@ export default function Grid() {
             lastName={npc.lastName}
             isSelected={selectedBuildingId === npc.houseId}
             isControlled={npc.isControlled}
+          />
+        );
+      })}
+
+      {/* Wolves */}
+      {wolves.map(wolf => {
+        if (wolf.gridX === undefined || wolf.gridZ === undefined) return null;
+        const worldPos = gridToWorld(wolf.gridX, wolf.gridZ, TILE_SIZE);
+
+        return (
+          <Wolf
+            key={wolf.id}
+            wolfId={wolf.id}
+            position={[worldPos.x, 0, worldPos.z]}
+            isSelected={selectedWolfId === wolf.id}
+            onClick={(event) => {
+              handleWolfClick(event, wolf.id);
+              handleWolfAttack(wolf.id);
+            }}
           />
         );
       })}

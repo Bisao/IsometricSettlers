@@ -29,302 +29,240 @@ interface NPC {
   aiLastStateChange?: Date;
   aiTargetX?: number;
   aiTargetZ?: number;
+  health?: number;
+  maxHealth?: number;
+  mana?: number;
+  maxMana?: number;
+  isInCombat?: boolean;
+}
+
+interface Wolf {
+  id: string;
+  gridX: number;
+  gridZ: number;
+  health: number;
+  maxHealth: number;
 }
 
 interface BuildingState {
-  selectedBuilding: BuildingType | null;
+  // Buildings
+  availableBuildings: BuildingType[];
   placedBuildings: PlacedBuilding[];
-  previewPosition: { x: number; z: number } | null;
-  npcs: NPC[];
+  selectedBuildingType: string | null;
   selectedBuildingId: string | null;
+
+  // NPCs
+  npcs: NPC[];
   controlledNPCId: string | null;
-  openInventoryNPCId: string | null;
+
+  // Wolves and Combat
+  wolves: Wolf[];
+  selectedWolfId: string | null;
 
   // Actions
-  selectBuilding: (building: BuildingType) => void;
-  clearSelection: () => void;
-  setPreviewPosition: (position: { x: number; z: number } | null) => void;
-  placeBuilding: (gridX: number, gridZ: number) => void;
+  selectBuildingType: (type: string | null) => void;
+  selectBuilding: (id: string | null) => void;
+  placeBuilding: (type: string, gridX: number, gridZ: number) => void;
   removeBuilding: (id: string) => void;
-  createNPC: (npcData: { firstName: string; lastName: string; houseId: string }) => void;
-  setSelectedBuildingId: (id: string | null) => void;
-  setControlledNPC: (npcId: string | null) => void;
-  moveNPCToPosition: (npcId: string, gridX: number, gridZ: number) => void;
-  setOpenInventoryNPCId: (npcId: string | null) => void;
-  setNPCAutoMode: (npcId: string, autoMode: boolean) => void;
+
+  // NPC Actions
+  createNPC: (firstName: string, lastName: string, houseId: string) => void;
+  removeNPC: (id: string) => void;
+  moveNPCToPosition: (id: string, gridX: number, gridZ: number) => void;
+  setControlledNPC: (id: string | null) => void;
+  setNPCAutoMode: (id: string, autoMode: boolean) => void;
   updateNPCAI: () => void;
+
+  // Wolf and Combat Actions
+  spawnWolf: (gridX: number, gridZ: number) => void;
+  removeWolf: (id: string) => void;
+  selectWolf: (id: string | null) => void;
+  attackWolf: (wolfId: string, damage: number) => void;
+  wolfAttackNPC: (wolfId: string, npcId: string) => void;
 }
 
 export const useBuilding = create<BuildingState>()(
   subscribeWithSelector((set, get) => ({
-    selectedBuilding: null,
+    // Buildings
+    availableBuildings: [],
     placedBuildings: [],
-    previewPosition: null,
-    npcs: [],
+    selectedBuildingType: null,
     selectedBuildingId: null,
+
+    // NPCs
+    npcs: [],
     controlledNPCId: null,
-    openInventoryNPCId: null,
 
-    selectBuilding: (building) => {
-      console.log('Selected building:', building.name);
-      set({ selectedBuilding: building });
+    // Wolves and Combat
+    wolves: [
+      // Spawn a few wolves by default
+      { id: 'wolf-1', gridX: 2, gridZ: 2, health: 50, maxHealth: 50 },
+      { id: 'wolf-2', gridX: 10, gridZ: 8, health: 50, maxHealth: 50 },
+      { id: 'wolf-3', gridX: 12, gridZ: 3, health: 50, maxHealth: 50 },
+    ],
+    selectedWolfId: null,
+
+    // Actions
+    selectBuildingType: (type) => set({ selectedBuildingType: type }),
+    selectBuilding: (id) => set({ selectedBuildingId: id }),
+    placeBuilding: (type, gridX, gridZ) => {
+      set((state) => ({
+        placedBuildings: [
+          ...state.placedBuildings,
+          { id: `building-${Date.now()}`, type, gridX, gridZ },
+        ],
+      }));
     },
-
-    clearSelection: () => {
-      console.log('Cleared building selection');
-      set({ selectedBuilding: null, previewPosition: null });
-    },
-
-    setPreviewPosition: (position) => {
-      set({ previewPosition: position });
-    },
-
-    placeBuilding: (gridX, gridZ) => {
-      const { selectedBuilding, placedBuildings } = get();
-
-      if (!selectedBuilding) {
-        console.log('No building selected for placement');
-        return;
-      }
-
-      // Check if position is already occupied
-      const isOccupied = placedBuildings.some(
-        building => building.gridX === gridX && building.gridZ === gridZ
-      );
-
-      if (isOccupied) {
-        console.log(`Position (${gridX}, ${gridZ}) is already occupied`);
-        return;
-      }
-
-      // Create new building
-      const newBuilding: PlacedBuilding = {
-        id: `${selectedBuilding.type}-${Date.now()}`,
-        type: selectedBuilding.type,
-        gridX,
-        gridZ
-      };
-
-      console.log(`Placed ${selectedBuilding.name} at (${gridX}, ${gridZ})`);
-
-      set({
-        placedBuildings: [...placedBuildings, newBuilding],
-        selectedBuilding: null,
-        previewPosition: null
-      });
-    },
-
     removeBuilding: (id) => {
       set((state) => ({
-        placedBuildings: state.placedBuildings.filter(building => building.id !== id)
+        placedBuildings: state.placedBuildings.filter(
+          (building) => building.id !== id
+        ),
       }));
     },
 
-    createNPC: (npcData) => {
+    // NPC Actions
+    createNPC: (firstName, lastName, houseId) => {
       const { npcs, placedBuildings } = get();
-      const building = placedBuildings.find(b => b.id === npcData.houseId);
+      const id = `npc-${Date.now()}`;
+      const building = placedBuildings.find((b) => b.id === houseId);
 
       if (!building) {
-        console.error('Building not found for NPC creation');
+        console.error("Building not found for NPC creation");
         return;
       }
 
       const newNPC: NPC = {
-        id: `npc-${Date.now()}`,
-        firstName: npcData.firstName,
-        lastName: npcData.lastName,
-        houseId: npcData.houseId,
+        id,
+        firstName,
+        lastName,
+        houseId,
         gridX: building.gridX,
         gridZ: building.gridZ,
         isControlled: false,
         isAutoMode: false,
         aiState: 'at_home',
         aiLastStateChange: new Date(),
+        health: 100,
+        maxHealth: 100,
+        mana: 100,
+        maxMana: 100,
+        isInCombat: false,
       };
 
       set({ npcs: [...npcs, newNPC] });
     },
-
-    setSelectedBuildingId: (id) => {
-      set({ selectedBuildingId: id });
+    removeNPC: (id) => {
+      set((state) => ({
+        npcs: state.npcs.filter((npc) => npc.id !== id),
+      }));
     },
-
-    setControlledNPC: (npcId) => {
-      const { npcs } = get();
-
-      set({ 
-        controlledNPCId: npcId,
-        npcs: npcs.map(npc => ({
-          ...npc,
-          isControlled: npc.id === npcId
-        }))
-      });
+    moveNPCToPosition: (id, gridX, gridZ) => {
+      set((state) => ({
+        npcs: state.npcs.map((npc) =>
+          npc.id === id ? { ...npc, gridX, gridZ } : npc
+        ),
+      }));
     },
-
-    moveNPCToPosition: (npcId, gridX, gridZ) => {
-      const { npcs } = get();
-      const npc = npcs.find(n => n.id === npcId);
-      
-      if (npc) {
-        console.log(`Store: Moving NPC ${npc.firstName} to (${gridX}, ${gridZ})`);
-      }
-
-      set({
-        npcs: npcs.map(npc => 
-          npc.id === npcId 
-            ? { ...npc, gridX, gridZ }
-            : npc
-        )
-      });
+    setControlledNPC: (id) => {
+      set({ controlledNPCId: id });
     },
-
-    setOpenInventoryNPCId: (npcId) => {
-      set({ openInventoryNPCId: npcId });
+    setNPCAutoMode: (id, autoMode) => {
+      set((state) => ({
+        npcs: state.npcs.map((npc) =>
+          npc.id === id ? { ...npc, isAutoMode: autoMode } : npc
+        ),
+      }));
     },
-
-    setNPCAutoMode: (npcId, autoMode) => {
-      const { npcs, placedBuildings } = get();
-      const npc = npcs.find(n => n.id === npcId);
-      
-      if (!npc) return;
-
-      // Se desabilitando auto mode, reseta o NPC para casa
-      if (!autoMode) {
-        const building = placedBuildings.find(b => b.id === npc.houseId);
-        if (building) {
-          set({
-            npcs: npcs.map(n => 
-              n.id === npcId 
-                ? { 
-                    ...n, 
-                    isAutoMode: false, 
-                    aiState: 'at_home',
-                    gridX: building.gridX,
-                    gridZ: building.gridZ,
-                    aiTargetX: undefined,
-                    aiTargetZ: undefined,
-                    aiLastStateChange: new Date()
-                  }
-                : n
-            )
-          });
-        }
-      } else {
-        // Se habilitando auto mode, inicia no estado at_home
-        set({
-          npcs: npcs.map(n => 
-            n.id === npcId 
-              ? { 
-                  ...n, 
-                  isAutoMode: true, 
-                  aiState: 'at_home',
-                  aiLastStateChange: new Date()
-                }
-              : n
-          )
-        });
-      }
-    },
-
     updateNPCAI: () => {
-      const { npcs, placedBuildings } = get();
-      const now = new Date();
+      set((state) => ({
+        npcs: state.npcs.map((npc) => {
+          if (!npc.isAutoMode) return npc;
 
-      const updatedNPCs = npcs.map(npc => {
-        if (!npc.isAutoMode || npc.isControlled) return npc;
+          // Basic AI logic
+          if (npc.aiState === "at_home") {
+            // After a delay, start exploring
+            setTimeout(() => {
+              set((state) => ({
+                npcs: state.npcs.map((n) =>
+                  n.id === npc.id ? { ...n, aiState: "exploring" } : n
+                ),
+              }));
+            }, 5000);
+            return npc;
+          }
 
-        const building = placedBuildings.find(b => b.id === npc.houseId);
-        if (!building) return npc;
+          // If exploring, move randomly
+          if (npc.aiState === "exploring") {
+            const newGridX = Math.floor(Math.random() * 10);
+            const newGridZ = Math.floor(Math.random() * 10);
+            return { ...npc, gridX: newGridX, gridZ: newGridZ };
+          }
 
-        const timeSinceStateChange = now.getTime() - (npc.aiLastStateChange?.getTime() || 0);
-        
-        switch (npc.aiState) {
-          case 'at_home':
-            // Fica em casa por 3-5 segundos, depois sai para explorar
-            if (timeSinceStateChange > 3000 + Math.random() * 2000) {
-              // Escolhe um ponto aleatório para explorar (evita a própria casa)
-              let targetX, targetZ;
-              do {
-                targetX = Math.floor(Math.random() * 15);
-                targetZ = Math.floor(Math.random() * 15);
-              } while (targetX === building.gridX && targetZ === building.gridZ);
-              
-              console.log(`NPC ${npc.firstName} going to explore (${targetX}, ${targetZ})`);
-              
-              return {
-                ...npc,
-                aiState: 'exploring',
-                aiTargetX: targetX,
-                aiTargetZ: targetZ,
-                aiLastStateChange: now
-              };
-            }
-            break;
-            
-          case 'exploring':
-            // Verifica se chegou no destino de exploração
-            if (npc.gridX === npc.aiTargetX && npc.gridZ === npc.aiTargetZ) {
-              // Chegou no destino, escolhe um novo ponto ou volta para casa
-              if (Math.random() > 0.3) { // 70% chance de continuar explorando
-                let targetX, targetZ;
-                do {
-                  targetX = Math.floor(Math.random() * 15);
-                  targetZ = Math.floor(Math.random() * 15);
-                } while (targetX === npc.gridX && targetZ === npc.gridZ);
-                
-                console.log(`NPC ${npc.firstName} continuing exploration to (${targetX}, ${targetZ})`);
-                
-                return {
-                  ...npc,
-                  aiTargetX: targetX,
-                  aiTargetZ: targetZ,
-                  aiLastStateChange: now
-                };
-              } else {
-                // Volta para casa
-                console.log(`NPC ${npc.firstName} returning home`);
-                return {
-                  ...npc,
-                  aiState: 'returning',
-                  aiTargetX: building.gridX,
-                  aiTargetZ: building.gridZ,
-                  aiLastStateChange: now
-                };
-              }
-            }
-            
-            // Se está explorando há muito tempo (20-30 segundos), força volta para casa
-            if (timeSinceStateChange > 20000 + Math.random() * 10000) {
-              console.log(`NPC ${npc.firstName} timeout, returning home`);
-              return {
-                ...npc,
-                aiState: 'returning',
-                aiTargetX: building.gridX,
-                aiTargetZ: building.gridZ,
-                aiLastStateChange: now
-              };
-            }
-            break;
-            
-          case 'returning':
-            // Verifica se chegou em casa
-            if (npc.gridX === building.gridX && npc.gridZ === building.gridZ) {
-              console.log(`NPC ${npc.firstName} arrived home`);
-              return {
-                ...npc,
-                aiState: 'at_home',
-                aiTargetX: undefined,
-                aiTargetZ: undefined,
-                aiLastStateChange: now
-              };
-            }
-            break;
-        }
+          return npc;
+        }),
+      }));
+    },
 
-        return npc;
+    // Wolf and Combat Actions
+    spawnWolf: (gridX: number, gridZ: number) => {
+      const id = `wolf-${Date.now()}`;
+      const newWolf: Wolf = {
+        id,
+        gridX,
+        gridZ,
+        health: 50,
+        maxHealth: 50,
+      };
+
+      set(state => ({
+        wolves: [...state.wolves, newWolf]
+      }));
+    },
+
+    removeWolf: (id: string) => {
+      set(state => ({
+        wolves: state.wolves.filter(wolf => wolf.id !== id),
+        selectedWolfId: state.selectedWolfId === id ? null : state.selectedWolfId
+      }));
+    },
+
+    selectWolf: (id: string | null) => {
+      set({ selectedWolfId: id });
+    },
+
+    attackWolf: (wolfId: string, damage: number) => {
+      set(state => {
+        const updatedWolves = state.wolves.map(wolf => {
+          if (wolf.id === wolfId) {
+            const newHealth = Math.max(0, wolf.health - damage);
+            return { ...wolf, health: newHealth };
+          }
+          return wolf;
+        });
+
+        return { wolves: updatedWolves };
       });
+    },
 
-      set({ npcs: updatedNPCs });
+    wolfAttackNPC: (wolfId: string, npcId: string) => {
+      set(state => {
+        const updatedNPCs = state.npcs.map(npc => {
+          if (npc.id === npcId) {
+            const damage = 10;
+            const newHealth = Math.max(0, (npc.health || 100) - damage);
+            console.log(`Wolf attacks ${npc.firstName}! ${damage} damage dealt.`);
+            return { 
+              ...npc, 
+              health: newHealth,
+              isInCombat: true
+            };
+          }
+          return npc;
+        });
+
+        return { npcs: updatedNPCs };
+      });
     }
   }))
 );

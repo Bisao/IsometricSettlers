@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import Grid from "./Grid";
@@ -6,6 +6,21 @@ import Camera from "./Camera";
 
 export default function GameScene() {
   const sceneRef = useRef<THREE.Group>(null);
+
+  // Prevent default browser context menu on right-click
+  useEffect(() => {
+    const preventContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    const canvas = document.querySelector('canvas');
+    if (canvas) {
+      canvas.addEventListener('contextmenu', preventContextMenu);
+      return () => {
+        canvas.removeEventListener('contextmenu', preventContextMenu);
+      };
+    }
+  }, []);
 
   return (
     <group ref={sceneRef}>

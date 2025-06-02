@@ -61,8 +61,18 @@ export function useGridPlacement({
     }
   }, [getGridPosition, onPlace]);
 
+  const handleContextMenu = useCallback((event: THREE.Event) => {
+    event.stopPropagation();
+    const gridPos = getGridPosition(event);
+    
+    if (gridPos) {
+      onPlace(gridPos.x, gridPos.z, true); // Pass true to indicate right-click
+    }
+  }, [getGridPosition, onPlace]);
+
   return {
     handlePointerMove,
-    handleClick
+    handleClick,
+    handleContextMenu
   };
 }

@@ -34,7 +34,7 @@ export default function Grid() {
   grassTexture.repeat.set(GRID_SIZE, GRID_SIZE);
 
   // Grid placement hook
-  const { handlePointerMove, handleClick } = useGridPlacement({
+  const { handlePointerMove, handleClick, handleContextMenu } = useGridPlacement({
     gridSize: GRID_SIZE,
     tileSize: TILE_SIZE,
     camera,
@@ -148,11 +148,11 @@ export default function Grid() {
               const validObjects = gridRef.current.children.filter(child => 
                 child && child.type && (child.type === 'Mesh' || child.type === 'Group')
               );
-              
+
               if (validObjects.length > 0) {
                 const intersections = raycaster.intersectObjects(validObjects, true);
                 const intersection = intersections[0];
-                
+
                 if (intersection && intersection.point) {
                   const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
                   handleGridClick(gridPos.x, gridPos.z);
@@ -163,10 +163,7 @@ export default function Grid() {
             console.error('Error in grid click handler:', error);
           }
         }}
-        onContextMenu={(e) => {
-          e.stopPropagation();
-          clearSelection();
-        }}
+        onContextMenu={handleContextMenu}
       >
         <boxGeometry args={[GRID_SIZE, 0.1, GRID_SIZE]} />
         <meshLambertMaterial map={grassTexture} />

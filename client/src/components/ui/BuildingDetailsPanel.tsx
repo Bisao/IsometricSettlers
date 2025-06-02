@@ -66,10 +66,52 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                 <div className="space-y-2">
                   {buildingNPCs.map((npc) => (
                     <div key={npc.id} className="p-2 bg-gray-50 rounded border">
-                      <p className="font-medium text-gray-800">
-                        {npc.firstName} {npc.lastName}
-                      </p>
-                      <p className="text-xs text-gray-600">ID: {npc.id}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800">
+                            {npc.firstName} {npc.lastName}
+                          </p>
+                          <p className="text-xs text-gray-600">ID: {npc.id}</p>
+                        </div>
+                        <div className="flex gap-1 ml-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200"
+                            title="Inventário"
+                            onClick={() => console.log(`Inventário do ${npc.firstName}`)}
+                          >
+                            🎒
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200"
+                            title="Auto"
+                            onClick={() => console.log(`Auto mode para ${npc.firstName}`)}
+                          >
+                            🤖
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200"
+                            title="Manual"
+                            onClick={() => console.log(`Manual mode para ${npc.firstName}`)}
+                          >
+                            🕹️
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200"
+                            title="Ver"
+                            onClick={() => console.log(`Ver detalhes do ${npc.firstName}`)}
+                          >
+                            👁️
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

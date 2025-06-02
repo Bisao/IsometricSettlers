@@ -163,6 +163,11 @@ export const useBuilding = create<BuildingState>()(
 
     moveNPCToPosition: (npcId, gridX, gridZ) => {
       const { npcs } = get();
+      const npc = npcs.find(n => n.id === npcId);
+      
+      if (npc) {
+        console.log(`Store: Moving NPC ${npc.firstName} to (${gridX}, ${gridZ})`);
+      }
 
       set({
         npcs: npcs.map(npc => 

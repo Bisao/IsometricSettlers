@@ -124,7 +124,7 @@ export default function Grid() {
     }
   }, [selectedBuilding, clearSelection]);
 
-  
+
 
   // Ensure grid ref stability and prevent null references
   useEffect(() => {
@@ -165,19 +165,18 @@ export default function Grid() {
         );
       })}
 
-      {/* Render NPCs */}
-      {npcs.map((npc) => {
+      {/* NPCs */}
+      {npcs.map(npc => {
         const building = placedBuildings.find(b => b.id === npc.houseId);
         if (!building) return null;
 
-        // Use controlled position or default house position (in grid coordinates)
         let npcGridPos: [number, number, number];
 
-        if (npc.isControlled && npc.gridX !== undefined && npc.gridZ !== undefined) {
-          // Use controlled position (grid coordinates)
+        // Sempre use a posição atual do NPC se disponível, independente do modo
+        if (npc.gridX !== undefined && npc.gridZ !== undefined) {
           npcGridPos = [npc.gridX, 0, npc.gridZ];
         } else {
-          // Default position - spawn on the same tile as the house (grid coordinates)
+          // Fallback para posição da casa
           npcGridPos = [building.gridX, 0, building.gridZ];
         }
 

@@ -47,10 +47,9 @@ export function useNPCAI() {
 
           // Debug log
           if (nextX !== currentX || nextZ !== currentZ) {
-            console.log(`Moving NPC ${npc.firstName} from (${currentX}, ${currentZ}) to (${nextX}, ${nextZ}), target: (${targetX}, ${targetZ})`);
+            console.log(`Moving NPC ${npc.firstName} from (${currentX}, ${currentZ}) to (${nextX}, ${nextZ}), target: (${targetX}, ${targetZ}), state: ${npc.aiState}`);
+            moveNPCToPosition(npc.id, nextX, nextZ);
           }
-
-          moveNPCToPosition(npc.id, nextX, nextZ);
         }
       });
     }, 2000); // Movimento a cada 2 segundos para ser mais visível

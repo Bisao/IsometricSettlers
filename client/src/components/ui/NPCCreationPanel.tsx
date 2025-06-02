@@ -49,7 +49,7 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
 
   return (
     <>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 z-60">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 z-[70]">
         <Card className="bg-white bg-opacity-95 backdrop-blur-sm shadow-xl">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
@@ -120,7 +120,7 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
 
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-30 z-50"
+        className="fixed inset-0 bg-black bg-opacity-30 z-[60]"
         onClick={onClose}
       />
     </>

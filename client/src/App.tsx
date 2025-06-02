@@ -71,7 +71,7 @@ function App() {
         >
           <GameScene />
         </Canvas>
-        
+
         {/* Building Details Panel */}
         {selectedBuildingId && (
           <BuildingDetailsPanel 

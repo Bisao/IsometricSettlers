@@ -35,8 +35,7 @@ export default function GameScene() {
   }, []);
 
   return (
-    <div>
-      <group ref={sceneRef}>
+    <group ref={sceneRef}>
         {/* Lighting setup */}
         <ambientLight intensity={0.4} />
         <directionalLight
@@ -69,33 +68,6 @@ export default function GameScene() {
           maxDistance={30}
           target={[0, 0, 0]}
         />
-      </group>
-
-      {/* UI Panels */}
-      <BuildingPanel />
-
-      {selectedBuildingId && (
-        <BuildingDetailsPanel buildingId={selectedBuildingId} />
-      )}
-
-      <SettingsPanel />
-
-      {/* Combat HUD - only show when NPC is controlled or in auto mode and in combat */}
-      {controlledNPCId && (
-        <CombatHUD 
-          npcId={controlledNPCId}
-          isVisible={true}
-        />
-      )}
-
-      {/* Show combat HUD for NPCs in auto mode that are in combat */}
-      {npcs.filter(npc => npc.isAutoMode && npc.isInCombat).map(npc => (
-        <CombatHUD 
-          key={npc.id}
-          npcId={npc.id}
-          isVisible={true}
-        />
-      ))}
-    </div>
+    </group>
   );
 }

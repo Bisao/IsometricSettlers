@@ -336,7 +336,7 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
         <meshLambertMaterial color="#FFFFFF" />
       </mesh>
 
-      {/* Enhanced floating name */}
+      {/* Enhanced floating name - always faces camera */}
       <Text
         position={[0, 1.4, 0]}
         fontSize={0.12}
@@ -346,6 +346,7 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
         outlineWidth={0.015}
         outlineColor="#000000"
         fontWeight="bold"
+        billboard={true}
       >
         {firstName} {lastName}
       </Text>

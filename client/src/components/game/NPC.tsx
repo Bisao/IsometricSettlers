@@ -32,12 +32,8 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   const hasGlasses = nameHash % 4 === 0;
   const hasHat = nameHash % 5 === 0;
 
-  // Simple breathing and idle animations
+  // Simple idle animations (without breathing)
   useFrame((state) => {
-    if (npcRef.current) {
-      npcRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
-    }
-
     // Head movement
     if (headRef.current) {
       headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.2;

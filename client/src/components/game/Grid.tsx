@@ -88,7 +88,7 @@ export default function Grid() {
       <Building
         key="preview"
         type={selectedBuilding.type}
-        position={[worldPos.x, 0.5, worldPos.z]}
+        position={[worldPos.x, 0.05, worldPos.z]}
         isPreview={true}
         isValid={isValidPlacement}
       />
@@ -136,7 +136,7 @@ export default function Grid() {
           <Building
             key={`placed-${index}`}
             type={building.type}
-            position={[worldPos.x, 0.5, worldPos.z]}
+            position={[worldPos.x, 0.05, worldPos.z]}
             isPreview={false}
             isValid={true}
           />

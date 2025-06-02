@@ -21,6 +21,9 @@ interface NPC {
   firstName: string;
   lastName: string;
   houseId: string;
+  gridX?: number;
+  gridZ?: number;
+  isControlled?: boolean;
 }
 
 interface BuildingState {
@@ -29,6 +32,7 @@ interface BuildingState {
   previewPosition: { x: number; z: number } | null;
   npcs: NPC[];
   selectedBuildingId: string | null;
+  controlledNPCId: string | null;
   
   // Actions
   selectBuilding: (building: BuildingType) => void;
@@ -38,6 +42,8 @@ interface BuildingState {
   removeBuilding: (id: string) => void;
   createNPC: (npcData: { firstName: string; lastName: string; houseId: string }) => void;
   setSelectedBuildingId: (id: string | null) => void;
+  setControlledNPC: (npcId: string | null) => void;
+  moveNPCToPosition: (npcId: string, gridX: number, gridZ: number) => void;
 }
 
 export const useBuilding = create<BuildingState>()(
@@ -47,6 +53,7 @@ export const useBuilding = create<BuildingState>()(
     previewPosition: null,
     npcs: [],
     selectedBuildingId: null,
+    controlledNPCId: null,
     
     selectBuilding: (building) => {
       console.log('Selected building:', building.name);
@@ -120,6 +127,30 @@ export const useBuilding = create<BuildingState>()(
 
     setSelectedBuildingId: (id) => {
       set({ selectedBuildingId: id });
+    },
+
+    setControlledNPC: (npcId) => {
+      const { npcs } = get();
+      
+      set({ 
+        controlledNPCId: npcId,
+        npcs: npcs.map(npc => ({
+          ...npc,
+          isControlled: npc.id === npcId
+        }))
+      });
+    },
+
+    moveNPCToPosition: (npcId, gridX, gridZ) => {
+      const { npcs } = get();
+      
+      set({
+        npcs: npcs.map(npc => 
+          npc.id === npcId 
+            ? { ...npc, gridX, gridZ }
+            : npc
+        )
+      });
     }
   }))
 );

@@ -13,21 +13,23 @@ const TILE_SIZE = 1;
 
 export default function Grid() {
   const gridRef = useRef<THREE.Group>(null);
-  const { camera } = useThree();
-  const grassTexture = useTexture("/textures/grass.png");
+  const { camera, raycaster, mouse, gl } = useThree();
 
-  const { 
-    selectedBuilding, 
-    previewPosition, 
-    placedBuildings, 
+  const {
+    selectedBuilding,
+    placedBuildings,
+    previewPosition,
     npcs,
     selectedBuildingId,
-    placeBuilding, 
+    controlledNPCId,
+    setPreviewPosition,
+    placeBuilding,
     clearSelection,
-    setPreviewPosition
+    moveNPCToPosition
   } = useBuilding();
 
   // Configure grass texture
+  const grassTexture = useTexture("/textures/grass.png");
   grassTexture.wrapS = grassTexture.wrapT = THREE.RepeatWrapping;
   grassTexture.repeat.set(GRID_SIZE, GRID_SIZE);
 
@@ -112,6 +114,16 @@ export default function Grid() {
     }
   }, [selectedBuilding, clearSelection]);
 
+  const handleGridClick = (gridX: number, gridZ: number) => {
+    if (controlledNPCId) {
+      // Move controlled NPC to clicked position
+      moveNPCToPosition(controlledNPCId, gridX, gridZ);
+      console.log(`Moving controlled NPC to grid position (${gridX}, ${gridZ})`);
+    } else if (selectedBuilding) {
+      placeBuilding(gridX, gridZ);
+    }
+  };
+
   return (
     <group ref={gridRef}>
       {/* Ground plane */}
@@ -119,7 +131,15 @@ export default function Grid() {
         position={[GRID_SIZE/2 - 0.5, -0.1, GRID_SIZE/2 - 0.5]} 
         receiveShadow
         onPointerMove={handlePointerMove}
-        onClick={handleClick}
+        onClick={(e) => {
+          handleClick(e);
+          // Get grid coordinates from click
+          const intersection = raycaster.intersectObjects([gridRef.current], true)[0];
+          if (intersection) {
+            const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
+            handleGridClick(gridPos.x, gridPos.z);
+          }
+        }}
         onContextMenu={(e) => {
           e.stopPropagation();
           clearSelection();
@@ -147,18 +167,24 @@ export default function Grid() {
         );
       })}
 
-      {/* NPCs no mundo */}
+      {/* Render NPCs */}
       {npcs.map((npc) => {
         const building = placedBuildings.find(b => b.id === npc.houseId);
         if (!building) return null;
 
-        const worldPos = gridToWorld(building.gridX, building.gridZ, TILE_SIZE);
-        // Posicionar NPC perto da casa
-        const npcPos: [number, number, number] = [
-          worldPos.x + (Math.random() - 0.5) * 1.5,
-          0,
-          worldPos.z + (Math.random() - 0.5) * 1.5
-        ];
+        // Use controlled position or default house position
+        let npcPos: [number, number, number];
+
+        if (npc.isControlled && npc.gridX !== undefined && npc.gridZ !== undefined) {
+          // Use controlled position
+          npcPos = [npc.gridX, 0, npc.gridZ];
+        } else if (npc.isControlled) {
+          // First time controlling - spawn in front of house
+          npcPos = [building.gridX, 0, building.gridZ + 1];
+        } else {
+          // Default position in front of house
+          npcPos = [building.gridX, 0, building.gridZ + 1];
+        }
 
         return (
           <NPC
@@ -167,6 +193,7 @@ export default function Grid() {
             firstName={npc.firstName}
             lastName={npc.lastName}
             isSelected={selectedBuildingId === npc.houseId}
+            isControlled={npc.isControlled}
           />
         );
       })}

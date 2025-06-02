@@ -13,7 +13,7 @@ interface BuildingDetailsPanelProps {
 
 export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDetailsPanelProps) {
   const [showNPCCreation, setShowNPCCreation] = useState(false);
-  const { placedBuildings, npcs, removeBuilding } = useBuilding();
+  const { placedBuildings, npcs, removeBuilding, setControlledNPC, controlledNPCId } = useBuilding();
   const isMobile = useIsMobile();
 
   const building = placedBuildings.find(b => b.id === buildingId);
@@ -103,8 +103,18 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                               🤖
                             </button>
                             <button
-                              onClick={() => console.log(`Setting manual mode for ${npc.firstName} ${npc.lastName}`)}
-                              className="w-8 h-8 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-lg flex items-center justify-center text-purple-700 transition-colors"
+                              onClick={() => {
+                                const building = placedBuildings.find(b => b.id === buildingId);
+                                if (building) {
+                                  // Spawn NPC in front of the house when manual control is activated
+                                  const frontX = building.gridX;
+                                  const frontZ = building.gridZ + 1; // In front of the house
+                                  
+                                  setControlledNPC(npc.id);
+                                  console.log(`Setting manual mode for ${npc.firstName} ${npc.lastName} at position (${frontX}, ${frontZ})`);
+                                }
+                              }}
+                              className={`w-8 h-8 ${controlledNPCId === npc.id ? 'bg-purple-300 border-purple-500' : 'bg-purple-100 hover:bg-purple-200 border-purple-300'} rounded-lg flex items-center justify-center text-purple-700 transition-colors`}
                               title="Modo Manual"
                             >
                               🕹️

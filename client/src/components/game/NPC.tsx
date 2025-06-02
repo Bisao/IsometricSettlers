@@ -9,9 +9,10 @@ interface NPCProps {
   firstName: string;
   lastName: string;
   isSelected?: boolean;
+  isControlled?: boolean;
 }
 
-export default function NPC({ position, firstName, lastName, isSelected = false }: NPCProps) {
+export default function NPC({ position, firstName, lastName, isSelected = false, isControlled = false }: NPCProps) {
   const npcRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Mesh>(null);
   
@@ -132,6 +133,14 @@ export default function NPC({ position, firstName, lastName, isSelected = false 
         <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.3, 0.35, 32]} />
           <meshLambertMaterial color="#FFD700" transparent opacity={0.8} />
+        </mesh>
+      )}
+
+      {/* Indicador de controle manual */}
+      {isControlled && (
+        <mesh position={[0, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.35, 0.4, 32]} />
+          <meshLambertMaterial color="#9F7AEA" transparent opacity={0.9} />
         </mesh>
       )}
     </group>

@@ -134,10 +134,12 @@ export default function Grid() {
         onClick={(e) => {
           handleClick(e);
           // Get grid coordinates from click
-          const intersection = raycaster.intersectObjects([gridRef.current], true)[0];
-          if (intersection) {
-            const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
-            handleGridClick(gridPos.x, gridPos.z);
+          if (gridRef.current) {
+            const intersection = raycaster.intersectObjects([gridRef.current], true)[0];
+            if (intersection) {
+              const gridPos = worldToGrid(intersection.point.x, intersection.point.z, TILE_SIZE);
+              handleGridClick(gridPos.x, gridPos.z);
+            }
           }
         }}
         onContextMenu={(e) => {

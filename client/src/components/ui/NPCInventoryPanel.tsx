@@ -113,15 +113,15 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
     return (
       <div
         key={slot.id}
-        className="w-16 h-16 bg-amber-50 border-2 border-amber-200 rounded-lg flex items-center justify-center relative hover:bg-amber-100 transition-colors cursor-pointer"
+        className="w-20 h-20 bg-amber-50 border-2 border-amber-200 rounded-lg flex items-center justify-center relative hover:bg-amber-100 transition-colors cursor-pointer"
         title={slot.name}
       >
         {equippedItem ? (
-          <div className={`w-full h-full rounded-lg flex items-center justify-center text-2xl ${RARITY_COLORS[equippedItem.rarity]}`}>
+          <div className={`w-full h-full rounded-lg flex items-center justify-center text-3xl ${RARITY_COLORS[equippedItem.rarity]}`}>
             {equippedItem.icon}
           </div>
         ) : (
-          <span className="text-2xl opacity-50">{slot.icon}</span>
+          <span className="text-3xl opacity-50">{slot.icon}</span>
         )}
       </div>
     );
@@ -131,7 +131,7 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
     return (
       <div
         key={item?.id || `empty-${index}`}
-        className={`w-16 h-16 rounded-lg border-2 flex items-center justify-center relative cursor-pointer transition-colors ${
+        className={`w-18 h-18 aspect-square rounded-lg border-2 flex items-center justify-center relative cursor-pointer transition-colors ${
           item
             ? `${RARITY_COLORS[item.rarity]} hover:opacity-80`
             : "bg-amber-50 border-amber-200 hover:bg-amber-100"
@@ -210,57 +210,63 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
             </div>
 
             {selectedTab === "inventory" ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="flex gap-4 h-full">
                 {/* Equipment Panel */}
-                <div className="lg:col-span-1">
-                  <h3 className="text-lg font-bold text-amber-900 mb-4">Equipment</h3>
+                <div className="w-72 flex-shrink-0">
+                  <h3 className="text-lg font-bold text-amber-900 mb-3">Equipment</h3>
                   
                   {/* Currency */}
                   <div className="mb-4 p-3 bg-amber-100 rounded-lg border border-amber-300">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1">
-                        <span className="text-yellow-600">🪙</span>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-yellow-600">🪙</span>
+                          <span className="text-amber-700 text-sm">Gold</span>
+                        </div>
                         <span className="font-bold text-amber-900">{npcStats.gold}</span>
-                        <span className="text-amber-700 text-sm">Gold</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-gray-400">🪙</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-400">🪙</span>
+                          <span className="text-amber-700 text-sm">Silver</span>
+                        </div>
                         <span className="font-bold text-amber-900">{npcStats.silver}</span>
-                        <span className="text-amber-700 text-sm">Silver</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Equipment Slots Grid */}
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-3 mb-4">
                     {EQUIPMENT_SLOTS.slice(0, 9).map(renderEquipmentSlot)}
                   </div>
 
                   {/* Mount slot */}
-                  <div className="mt-4 space-y-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {EQUIPMENT_SLOTS.slice(9).map(renderEquipmentSlot)}
                   </div>
                 </div>
 
                 {/* Inventory Grid */}
-                <div className="lg:col-span-2">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-bold text-amber-900">Inventory Slots (48)</h3>
                     <div className="text-sm text-amber-700">
                       Used: {unequippedItems.length}/48
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-8 gap-1 p-4 bg-amber-100 rounded-lg border border-amber-300">
-                    {inventorySlots}
-                  </div>
-
-                  {/* Market Value */}
-                  <div className="mt-4 text-center">
-                    <span className="text-sm text-amber-700">Est. Market Value: </span>
-                    <span className="font-bold text-amber-900">
-                      {inventoryItems.reduce((total, item) => total + (item.value * item.quantity), 0)} 🪙
-                    </span>
+                  <div className="bg-amber-100 rounded-lg border border-amber-300 p-3">
+                    <div className="grid grid-cols-8 gap-2 mb-4">
+                      {inventorySlots}
+                    </div>
+                    
+                    {/* Market Value */}
+                    <div className="text-center pt-2 border-t border-amber-300">
+                      <span className="text-sm text-amber-700">Est. Market Value: </span>
+                      <span className="font-bold text-amber-900">
+                        {inventoryItems.reduce((total, item) => total + (item.value * item.quantity), 0)} 🪙
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

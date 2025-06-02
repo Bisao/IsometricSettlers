@@ -45,6 +45,7 @@ interface BuildingState {
   setSelectedBuildingId: (id: string | null) => void;
   setControlledNPC: (npcId: string | null) => void;
   moveNPCToPosition: (npcId: string, gridX: number, gridZ: number) => void;
+  setOpenInventoryNPCId: (npcId: string | null) => void;
 }
 
 export const useBuilding = create<BuildingState>()(
@@ -153,6 +154,10 @@ export const useBuilding = create<BuildingState>()(
             : npc
         )
       });
+    },
+
+    setOpenInventoryNPCId: (npcId) => {
+      set({ openInventoryNPCId: npcId });
     }
   }))
 );

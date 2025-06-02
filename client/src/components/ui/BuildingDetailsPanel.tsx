@@ -15,6 +15,7 @@ interface BuildingDetailsPanelProps {
 export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDetailsPanelProps) {
   const { 
     placedBuildings, 
+    removeBuilding,
     selectedBuildingId, 
     setSelectedBuildingId, 
     npcs, 

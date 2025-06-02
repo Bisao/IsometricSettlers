@@ -71,15 +71,49 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                   <div className="space-y-3">
                     {buildingNPCs.map(npc => (
                       <div key={npc.id} className="bg-white p-3 rounded-lg border border-blue-300 shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                            {npc.firstName[0]}{npc.lastName[0]}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                              {npc.firstName[0]}{npc.lastName[0]}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-blue-900">
+                                {npc.firstName} {npc.lastName}
+                              </p>
+                              <p className="text-xs text-blue-600">Morador</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold text-blue-900">
-                              {npc.firstName} {npc.lastName}
-                            </p>
-                            <p className="text-xs text-blue-600">Morador</p>
+                          
+                          {/* NPC Action Buttons */}
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => console.log(`Opening inventory for ${npc.firstName} ${npc.lastName}`)}
+                              className="w-8 h-8 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg flex items-center justify-center text-amber-700 transition-colors"
+                              title="Inventário do NPC"
+                            >
+                              🎒
+                            </button>
+                            <button
+                              onClick={() => console.log(`Setting auto mode for ${npc.firstName} ${npc.lastName}`)}
+                              className="w-8 h-8 bg-green-100 hover:bg-green-200 border border-green-300 rounded-lg flex items-center justify-center text-green-700 transition-colors"
+                              title="Modo Automático"
+                            >
+                              🤖
+                            </button>
+                            <button
+                              onClick={() => console.log(`Setting manual mode for ${npc.firstName} ${npc.lastName}`)}
+                              className="w-8 h-8 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-lg flex items-center justify-center text-purple-700 transition-colors"
+                              title="Modo Manual"
+                            >
+                              🕹️
+                            </button>
+                            <button
+                              onClick={() => console.log(`Viewing details for ${npc.firstName} ${npc.lastName}`)}
+                              className="w-8 h-8 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg flex items-center justify-center text-gray-700 transition-colors"
+                              title="Ver Detalhes"
+                            >
+                              👁️
+                            </button>
                           </div>
                         </div>
                       </div>

@@ -1,3 +1,4 @@
+
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useIsMobile } from "../../hooks/use-is-mobile";
 import { FantasyPanel, FantasyButton } from "./fantasy-ui";
@@ -13,17 +14,24 @@ const buildings = [
 ];
 
 interface BuildingPanelProps {
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export default function BuildingPanel({ onClose }: BuildingPanelProps) {
-  const { selectedBuilding, setSelectedBuilding } = useBuilding();
+export default function BuildingPanel({ isOpen, onClose }: BuildingPanelProps) {
+  const { selectedBuilding, selectBuilding, clearSelection } = useBuilding();
   const isMobile = useIsMobile();
 
+  if (!isOpen) return null;
+
   const handleBuildingSelect = (building: typeof buildings[0]) => {
-    console.log("Selected building:", building.name);
-    setSelectedBuilding(building);
-    onClose();
+    if (selectedBuilding?.id === building.id) {
+      clearSelection();
+      onClose();
+    } else {
+      selectBuilding(building);
+      onClose();
+    }
   };
 
   return (
@@ -33,7 +41,7 @@ export default function BuildingPanel({ onClose }: BuildingPanelProps) {
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-
+      
       {/* Panel */}
       <div className={`relative ${isMobile ? 'w-11/12 max-w-sm' : 'w-96'} max-h-[80vh] overflow-y-auto`}>
         <FantasyPanel title="🏗️ Painel de Estruturas" onClose={onClose}>
@@ -41,7 +49,7 @@ export default function BuildingPanel({ onClose }: BuildingPanelProps) {
             <p className="text-amber-800 text-sm font-medium text-center">
               Selecione uma estrutura para posicionar no mundo
             </p>
-
+            
             <div className="space-y-3">
               {buildings.map((building) => (
                 <div key={building.id} className="space-y-2">
@@ -59,24 +67,52 @@ export default function BuildingPanel({ onClose }: BuildingPanelProps) {
                       </span>
                     )}
                   </FantasyButton>
-
-                  <p className="text-xs text-amber-600 px-2">
+                  
+                  <p className="text-xs text-amber-700 text-center italic">
                     {building.description}
                   </p>
                 </div>
               ))}
             </div>
-
+            
             {selectedBuilding && (
-              <div className="bg-amber-100 p-3 rounded-lg border-2 border-amber-300">
-                <p className="text-amber-800 text-sm font-medium text-center">
+              <div className="mt-6 p-3 bg-green-100 border-2 border-green-400 rounded-lg">
+                <p className="text-green-800 text-sm font-bold text-center">
                   ✨ {selectedBuilding.name} selecionada!
                 </p>
-                <p className="text-amber-600 text-xs text-center mt-1">
-                  Clique no terreno para posicionar
+                <p className="text-green-700 text-xs text-center mt-1">
+                  Clique no mapa para posicionar a estrutura
+                </p>
+                <p className="text-green-600 text-xs text-center mt-1">
+                  Pressione ESC para cancelar
                 </p>
               </div>
             )}
+            
+            <div className="flex gap-2 mt-4">
+              <FantasyButton
+                onClick={onClose}
+                variant="secondary"
+                size="sm"
+                className="flex-1"
+              >
+                Fechar
+              </FantasyButton>
+              
+              {selectedBuilding && (
+                <FantasyButton
+                  onClick={() => {
+                    clearSelection();
+                    onClose();
+                  }}
+                  variant="danger"
+                  size="sm"
+                  className="flex-1"
+                >
+                  Cancelar Seleção
+                </FantasyButton>
+              )}
+            </div>
           </div>
         </FantasyPanel>
       </div>

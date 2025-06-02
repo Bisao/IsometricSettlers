@@ -29,7 +29,7 @@ interface BuildingState {
   previewPosition: { x: number; z: number } | null;
   npcs: NPC[];
   selectedBuildingId: string | null;
-
+  
   // Actions
   selectBuilding: (building: BuildingType) => void;
   clearSelection: () => void;
@@ -38,7 +38,6 @@ interface BuildingState {
   removeBuilding: (id: string) => void;
   createNPC: (npcData: { firstName: string; lastName: string; houseId: string }) => void;
   setSelectedBuildingId: (id: string | null) => void;
-  setSelectedBuilding: (building: BuildingType | null) => void;
 }
 
 export const useBuilding = create<BuildingState>()(
@@ -48,39 +47,39 @@ export const useBuilding = create<BuildingState>()(
     previewPosition: null,
     npcs: [],
     selectedBuildingId: null,
-
+    
     selectBuilding: (building) => {
       console.log('Selected building:', building.name);
       set({ selectedBuilding: building });
     },
-
+    
     clearSelection: () => {
       console.log('Cleared building selection');
       set({ selectedBuilding: null, previewPosition: null });
     },
-
+    
     setPreviewPosition: (position) => {
       set({ previewPosition: position });
     },
-
+    
     placeBuilding: (gridX, gridZ) => {
       const { selectedBuilding, placedBuildings } = get();
-
+      
       if (!selectedBuilding) {
         console.log('No building selected for placement');
         return;
       }
-
+      
       // Check if position is already occupied
       const isOccupied = placedBuildings.some(
         building => building.gridX === gridX && building.gridZ === gridZ
       );
-
+      
       if (isOccupied) {
         console.log(`Position (${gridX}, ${gridZ}) is already occupied`);
         return;
       }
-
+      
       // Create new building
       const newBuilding: PlacedBuilding = {
         id: `${selectedBuilding.type}-${Date.now()}`,
@@ -88,16 +87,16 @@ export const useBuilding = create<BuildingState>()(
         gridX,
         gridZ
       };
-
+      
       console.log(`Placed ${selectedBuilding.name} at (${gridX}, ${gridZ})`);
-
+      
       set({
         placedBuildings: [...placedBuildings, newBuilding],
         selectedBuilding: null,
         previewPosition: null
       });
     },
-
+    
     removeBuilding: (id) => {
       set((state) => ({
         placedBuildings: state.placedBuildings.filter(building => building.id !== id)
@@ -111,9 +110,9 @@ export const useBuilding = create<BuildingState>()(
         lastName: npcData.lastName,
         houseId: npcData.houseId
       };
-
+      
       console.log(`Created NPC: ${newNPC.firstName} ${newNPC.lastName} for house ${newNPC.houseId}`);
-
+      
       set((state) => ({
         npcs: [...state.npcs, newNPC]
       }));
@@ -121,10 +120,6 @@ export const useBuilding = create<BuildingState>()(
 
     setSelectedBuildingId: (id) => {
       set({ selectedBuildingId: id });
-    },
-
-    setSelectedBuilding: (building) => {
-        set({ selectedBuilding: building });
     }
   }))
 );

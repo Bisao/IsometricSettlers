@@ -235,11 +235,16 @@ export const useBuilding = create<BuildingState>()(
         
         switch (npc.aiState) {
           case 'at_home':
-            // Fica em casa por 10-15 segundos, depois sai para explorar
-            if (timeSinceStateChange > 10000 + Math.random() * 5000) {
-              // Escolhe um ponto aleatório para explorar
-              const targetX = Math.floor(Math.random() * 15);
-              const targetZ = Math.floor(Math.random() * 15);
+            // Fica em casa por 3-5 segundos, depois sai para explorar
+            if (timeSinceStateChange > 3000 + Math.random() * 2000) {
+              // Escolhe um ponto aleatório para explorar (evita a própria casa)
+              let targetX, targetZ;
+              do {
+                targetX = Math.floor(Math.random() * 15);
+                targetZ = Math.floor(Math.random() * 15);
+              } while (targetX === building.gridX && targetZ === building.gridZ);
+              
+              console.log(`NPC ${npc.firstName} going to explore (${targetX}, ${targetZ})`);
               
               return {
                 ...npc,
@@ -252,8 +257,40 @@ export const useBuilding = create<BuildingState>()(
             break;
             
           case 'exploring':
-            // Explora por 15-25 segundos, depois volta para casa
-            if (timeSinceStateChange > 15000 + Math.random() * 10000) {
+            // Verifica se chegou no destino de exploração
+            if (npc.gridX === npc.aiTargetX && npc.gridZ === npc.aiTargetZ) {
+              // Chegou no destino, escolhe um novo ponto ou volta para casa
+              if (Math.random() > 0.3) { // 70% chance de continuar explorando
+                let targetX, targetZ;
+                do {
+                  targetX = Math.floor(Math.random() * 15);
+                  targetZ = Math.floor(Math.random() * 15);
+                } while (targetX === npc.gridX && targetZ === npc.gridZ);
+                
+                console.log(`NPC ${npc.firstName} continuing exploration to (${targetX}, ${targetZ})`);
+                
+                return {
+                  ...npc,
+                  aiTargetX: targetX,
+                  aiTargetZ: targetZ,
+                  aiLastStateChange: now
+                };
+              } else {
+                // Volta para casa
+                console.log(`NPC ${npc.firstName} returning home`);
+                return {
+                  ...npc,
+                  aiState: 'returning',
+                  aiTargetX: building.gridX,
+                  aiTargetZ: building.gridZ,
+                  aiLastStateChange: now
+                };
+              }
+            }
+            
+            // Se está explorando há muito tempo (20-30 segundos), força volta para casa
+            if (timeSinceStateChange > 20000 + Math.random() * 10000) {
+              console.log(`NPC ${npc.firstName} timeout, returning home`);
               return {
                 ...npc,
                 aiState: 'returning',
@@ -267,6 +304,7 @@ export const useBuilding = create<BuildingState>()(
           case 'returning':
             // Verifica se chegou em casa
             if (npc.gridX === building.gridX && npc.gridZ === building.gridZ) {
+              console.log(`NPC ${npc.firstName} arrived home`);
               return {
                 ...npc,
                 aiState: 'at_home',

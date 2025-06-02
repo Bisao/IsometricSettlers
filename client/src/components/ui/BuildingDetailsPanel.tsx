@@ -15,7 +15,7 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
   const [showNPCCreation, setShowNPCCreation] = useState(false);
   const { placedBuildings, npcs } = useBuilding();
   const isMobile = useIsMobile();
-  
+
   const building = placedBuildings.find(b => b.id === buildingId);
   const buildingNPCs = npcs.filter(npc => npc.houseId === buildingId);
 
@@ -78,38 +78,38 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                           </p>
                           <p className="text-xs text-gray-600">ID: {npc.id}</p>
                         </div>
-                        <div className={`flex gap-2 ${isMobile ? 'w-full justify-center' : 'ml-2'}`}>
+                        <div className={`flex gap-1 ml-2 ${isMobile ? 'w-full justify-center' : ''} flex-wrap sm:flex-nowrap`}>
                           <Button
-                            size={isMobile ? "default" : "sm"}
+                            size="sm"
                             variant="ghost"
-                            className={`${isMobile ? 'flex-1 min-w-0 px-2' : 'w-8 h-8 p-0'} text-lg hover:bg-gray-200`}
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200 flex-shrink-0"
                             title="Inventário"
                             onClick={() => console.log(`Inventário do ${npc.firstName}`)}
                           >
                             🎒
                           </Button>
                           <Button
-                            size={isMobile ? "default" : "sm"}
+                            size="sm"
                             variant="ghost"
-                            className={`${isMobile ? 'flex-1 min-w-0 px-2' : 'w-8 h-8 p-0'} text-lg hover:bg-gray-200`}
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200 flex-shrink-0"
                             title="Auto"
                             onClick={() => console.log(`Auto mode para ${npc.firstName}`)}
                           >
                             🤖
                           </Button>
                           <Button
-                            size={isMobile ? "default" : "sm"}
+                            size="sm"
                             variant="ghost"
-                            className={`${isMobile ? 'flex-1 min-w-0 px-2' : 'w-8 h-8 p-0'} text-lg hover:bg-gray-200`}
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200 flex-shrink-0"
                             title="Manual"
                             onClick={() => console.log(`Manual mode para ${npc.firstName}`)}
                           >
                             🕹️
                           </Button>
                           <Button
-                            size={isMobile ? "default" : "sm"}
+                            size="sm"
                             variant="ghost"
-                            className={`${isMobile ? 'flex-1 min-w-0 px-2' : 'w-8 h-8 p-0'} text-lg hover:bg-gray-200`}
+                            className="w-8 h-8 p-0 text-lg hover:bg-gray-200 flex-shrink-0"
                             title="Ver"
                             onClick={() => console.log(`Ver detalhes do ${npc.firstName}`)}
                           >

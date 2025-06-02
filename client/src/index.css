@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-first responsive utilities */
+@layer utilities {
+  /* Touch-friendly button sizes on mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Prevent text selection on UI elements */
+  .no-select {
+    @apply select-none;
+  }
+  
+  /* Smooth scrolling for panels */
+  .smooth-scroll {
+    @apply scroll-smooth;
+  }
+  
+  /* Mobile-friendly spacing */
+  .mobile-padding {
+    @apply p-4 sm:p-6;
+  }
+  
+  /* Responsive text sizes */
+  .responsive-text {
+    @apply text-sm sm:text-base;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

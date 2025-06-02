@@ -1,11 +1,17 @@
 import { Canvas } from "@react-three/fiber";
+import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import GameScene from "./components/game/GameScene";
 import BuildingPanel from "./components/ui/BuildingPanel";
+import BuildingDetailsPanel from "./components/ui/BuildingDetailsPanel";
+import { SettingsButton } from "./components/ui/SettingsPanel";
+import { useBuilding } from "./lib/stores/useBuilding";
+import "@fontsource/inter";
+import "./index.css";
 import { useGame } from "./lib/stores/useGame";
 import { useAudio } from "./lib/stores/useAudio";
 import { useIsMobile } from "./hooks/use-is-mobile";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const queryClient = new QueryClient();
 
@@ -13,6 +19,7 @@ function App() {
   const { initializeGame } = useGame();
   const { initializeAudio } = useAudio();
   const isMobile = useIsMobile();
+  const { selectedBuildingId, setSelectedBuildingId } = useBuilding();
 
   useEffect(() => {
     initializeGame();
@@ -61,7 +68,19 @@ function App() {
         >
           <GameScene />
         </Canvas>
+        {/* Building Panel UI */}
         <BuildingPanel />
+
+        {/* Building Details Panel */}
+        {selectedBuildingId && (
+          <BuildingDetailsPanel 
+            buildingId={selectedBuildingId}
+            onClose={() => setSelectedBuildingId(null)}
+          />
+        )}
+
+        {/* Settings Button */}
+        <SettingsButton />
       </div>
     </QueryClientProvider>
   );

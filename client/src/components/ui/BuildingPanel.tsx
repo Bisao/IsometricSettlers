@@ -1,8 +1,7 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useIsMobile } from "../../hooks/use-is-mobile";
+import { FantasyPanel, FantasyButton } from "./fantasy-ui";
 
 const buildings = [
   { 
@@ -10,55 +9,113 @@ const buildings = [
     name: "Casa", 
     type: "house" as const,
     icon: "🏠",
-    description: "Casa residencial"
+    description: "Casa residencial básica para NPCs"
   }
 ];
 
-export default function BuildingPanel() {
+interface BuildingPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function BuildingPanel({ isOpen, onClose }: BuildingPanelProps) {
   const { selectedBuilding, selectBuilding, clearSelection } = useBuilding();
   const isMobile = useIsMobile();
+
+  if (!isOpen) return null;
 
   const handleBuildingSelect = (building: typeof buildings[0]) => {
     if (selectedBuilding?.id === building.id) {
       clearSelection();
+      onClose();
     } else {
       selectBuilding(building);
+      onClose();
     }
   };
 
   return (
-    <div className={`absolute z-40 ${isMobile 
-      ? 'bottom-4 left-4 right-4' 
-      : 'top-4 left-4'
-    }`}>
-      <Card className="bg-white bg-opacity-90 backdrop-blur-sm shadow-lg">
-        <CardHeader className={`${isMobile ? 'pb-2 pt-3' : 'pb-3'}`}>
-          <CardTitle className={`text-gray-800 ${isMobile ? 'text-base text-center' : 'text-lg'}`}>
-            Construções
-          </CardTitle>
-        </CardHeader>
-        <CardContent className={`${isMobile ? 'space-y-1' : 'space-y-2'}`}>
-          <div className={`${isMobile ? 'grid grid-cols-1 gap-2' : 'space-y-2'}`}>
-            {buildings.map((building) => (
-              <Button
-                key={building.id}
-                onClick={() => handleBuildingSelect(building)}
-                variant={selectedBuilding?.id === building.id ? "default" : "outline"}
-                className={`${isMobile ? 'w-full h-12 text-xs' : 'w-full'} justify-start text-left ${
-                  selectedBuilding?.id === building.id 
-                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                    : 'hover:bg-gray-100'
-                }`}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      {/* Panel */}
+      <div className={`relative ${isMobile ? 'w-11/12 max-w-sm' : 'w-96'} max-h-[80vh] overflow-y-auto`}>
+        <FantasyPanel title="🏗️ Painel de Estruturas" onClose={onClose}>
+          <div className="space-y-4">
+            <p className="text-amber-800 text-sm font-medium text-center">
+              Selecione uma estrutura para posicionar no mundo
+            </p>
+            
+            <div className="space-y-3">
+              {buildings.map((building) => (
+                <div key={building.id} className="space-y-2">
+                  <FantasyButton
+                    onClick={() => handleBuildingSelect(building)}
+                    variant={selectedBuilding?.id === building.id ? "success" : "primary"}
+                    size={isMobile ? "sm" : "md"}
+                    className="w-full"
+                  >
+                    <span className="text-xl">{building.icon}</span>
+                    <span>{building.name}</span>
+                    {selectedBuilding?.id === building.id && (
+                      <span className="text-xs bg-green-800 px-2 py-1 rounded-full">
+                        SELECIONADO
+                      </span>
+                    )}
+                  </FantasyButton>
+                  
+                  <p className="text-xs text-amber-700 text-center italic">
+                    {building.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+            
+            {selectedBuilding && (
+              <div className="mt-6 p-3 bg-green-100 border-2 border-green-400 rounded-lg">
+                <p className="text-green-800 text-sm font-bold text-center">
+                  ✨ {selectedBuilding.name} selecionada!
+                </p>
+                <p className="text-green-700 text-xs text-center mt-1">
+                  Clique no mapa para posicionar a estrutura
+                </p>
+                <p className="text-green-600 text-xs text-center mt-1">
+                  Pressione ESC para cancelar
+                </p>
+              </div>
+            )}
+            
+            <div className="flex gap-2 mt-4">
+              <FantasyButton
+                onClick={onClose}
+                variant="secondary"
+                size="sm"
+                className="flex-1"
               >
-                <span className={`${isMobile ? 'mr-1 text-base' : 'mr-2 text-lg'}`}>
-                  {building.icon}
-                </span>
-                <span className={isMobile ? 'text-xs' : ''}>{building.name}</span>
-              </Button>
-            ))}
+                Fechar
+              </FantasyButton>
+              
+              {selectedBuilding && (
+                <FantasyButton
+                  onClick={() => {
+                    clearSelection();
+                    onClose();
+                  }}
+                  variant="danger"
+                  size="sm"
+                  className="flex-1"
+                >
+                  Cancelar Seleção
+                </FantasyButton>
+              )}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </FantasyPanel>
+      </div>
     </div>
   );
 }

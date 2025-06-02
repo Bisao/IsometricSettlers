@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import GameScene from "./components/game/GameScene";
 import BuildingDetailsPanel from "./components/ui/BuildingDetailsPanel";
+import BuildingPanel from "./components/ui/BuildingPanel";
 import { SettingsButton } from "./components/ui/SettingsPanel";
 import { useBuilding } from "./lib/stores/useBuilding";
 import "@fontsource/inter";
@@ -11,7 +12,7 @@ import { useGame } from "./lib/stores/useGame";
 import { useAudio } from "./lib/stores/useAudio";
 import { useIsMobile } from "./hooks/use-is-mobile";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { FantasyButton } from "./components/ui/fantasy-ui";
 import { Settings } from "lucide-react";
 import { SettingsPanel } from "./components/ui/SettingsPanel";
 
@@ -80,28 +81,26 @@ function App() {
         )}
 
         {/* Top Right Buttons */}
-        <div className="absolute top-4 right-4 z-50 flex gap-2">
+        <div className="absolute top-4 right-4 z-50 flex gap-3">
           {/* Structures Panel Button */}
-          <Button
+          <FantasyButton
             onClick={() => setShowStructures(true)}
-            size={isMobile ? "sm" : "default"}
-            variant="outline"
-            className="bg-white bg-opacity-90 backdrop-blur-sm shadow-lg hover:bg-gray-100"
+            size={isMobile ? "sm" : "md"}
+            variant="primary"
           >
             <span className="text-lg">🏗️</span>
-            {!isMobile && <span className="ml-2">Estruturas</span>}
-          </Button>
+            {!isMobile && <span>Estruturas</span>}
+          </FantasyButton>
 
           {/* Settings Button */}
-          <Button
+          <FantasyButton
             onClick={() => setShowSettings(true)}
-            size={isMobile ? "sm" : "default"}
-            variant="outline"
-            className="bg-white bg-opacity-90 backdrop-blur-sm shadow-lg hover:bg-gray-100"
+            size={isMobile ? "sm" : "md"}
+            variant="secondary"
           >
             <Settings className="w-4 h-4" />
-            {!isMobile && <span className="ml-2">Configurações</span>}
-          </Button>
+            {!isMobile && <span>Configurações</span>}
+          </FantasyButton>
         </div>
 
         {/* Settings Panel */}
@@ -109,39 +108,11 @@ function App() {
           <SettingsPanel onClose={() => setShowSettings(false)} />
         )}
 
-        {/* Structures Panel */}
-        {showStructures && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="bg-black bg-opacity-50 absolute inset-0" onClick={() => setShowStructures(false)} />
-            <div className={`relative bg-white rounded-lg shadow-xl ${isMobile ? 'w-11/12 max-w-sm' : 'w-96'} max-h-[80vh] overflow-y-auto`}>
-              <div className="p-4 border-b">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Painel de Estruturas</h2>
-                  <Button
-                    onClick={() => setShowStructures(false)}
-                    variant="ghost"
-                    size="sm"
-                    className="w-8 h-8 p-0"
-                  >
-                    ✕
-                  </Button>
-                </div>
-              </div>
-              <div className="p-4">
-                <p className="text-gray-600 text-sm">
-                  Aqui você pode gerenciar todas as estruturas do seu mundo virtual.
-                </p>
-                <div className="mt-4 space-y-2">
-                  <div className="p-3 bg-gray-50 rounded border">
-                    <h3 className="font-medium">🏠 Casas</h3>
-                    <p className="text-sm text-gray-600">Construções residenciais para NPCs</p>
-                  </div>
-                  {/* Removendo as outras construções conforme solicitado */}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Building Panel */}
+        <BuildingPanel 
+          isOpen={showStructures}
+          onClose={() => setShowStructures(false)}
+        />
       </div>
     </QueryClientProvider>
   );

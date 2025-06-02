@@ -1,11 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
+
+import React, { useState } from "react";
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useIsMobile } from "../../hooks/use-is-mobile";
+import { FantasyPanel, FantasyButton } from "./fantasy-ui";
 
 interface NPCCreationPanelProps {
   houseId: string;
@@ -15,19 +12,16 @@ interface NPCCreationPanelProps {
 export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const { addNPC } = useBuilding();
+  const { createNPC } = useBuilding();
   const isMobile = useIsMobile();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (firstName.trim() && lastName.trim()) {
-      addNPC({
-        id: `npc-${Date.now()}`,
+      createNPC({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         houseId,
-        x: 0, // Will be positioned at the house
-        z: 0,
       });
       console.log(`Created NPC: ${firstName} ${lastName} for house ${houseId}`);
       onClose();
@@ -35,83 +29,78 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
   };
 
   return (
-    <>
-      <div className={`absolute z-60 ${isMobile 
-        ? 'inset-x-4 top-1/2 transform -translate-y-1/2' 
-        : 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80'
-      }`}>
-        <Card className="bg-white bg-opacity-95 backdrop-blur-sm shadow-xl">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-gray-800 text-lg">Criar Novo NPC</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                <X className="w-4 h-4" />
-              </Button>
+    <div className="fixed inset-0 z-60 flex items-center justify-center">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      {/* Panel */}
+      <div className={`relative ${isMobile ? 'w-11/12 max-w-sm' : 'w-96'}`}>
+        <FantasyPanel title="👤 Criar Novo Morador" onClose={onClose}>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="text-center mb-4">
+              <p className="text-amber-700 text-sm">
+                Crie um novo personagem para habitar esta casa
+              </p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+
+            <div className="space-y-3">
               <div>
-                <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                  Nome
-                </Label>
-                <Input
-                  id="firstName"
+                <label className="block text-amber-800 font-semibold mb-1 text-sm">
+                  Nome:
+                </label>
+                <input
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Digite o nome"
-                  className="mt-1"
+                  className="w-full px-3 py-2 border-2 border-amber-300 rounded-lg focus:border-amber-500 focus:outline-none bg-amber-50"
+                  placeholder="Digite o primeiro nome"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-                  Sobrenome
-                </Label>
-                <Input
-                  id="lastName"
+                <label className="block text-amber-800 font-semibold mb-1 text-sm">
+                  Sobrenome:
+                </label>
+                <input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-3 py-2 border-2 border-amber-300 rounded-lg focus:border-amber-500 focus:outline-none bg-amber-50"
                   placeholder="Digite o sobrenome"
-                  className="mt-1"
                   required
                 />
               </div>
+            </div>
 
-              <div className={`flex gap-2 pt-4 ${isMobile ? 'flex-col' : ''}`}>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Criar NPC
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+            <div className="flex gap-2 pt-2">
+              <FantasyButton
+                type="submit"
+                variant="success"
+                size="md"
+                className="flex-1"
+                disabled={!firstName.trim() || !lastName.trim()}
+              >
+                <span>✨</span>
+                <span>Criar Morador</span>
+              </FantasyButton>
+
+              <FantasyButton
+                type="button"
+                onClick={onClose}
+                variant="secondary"
+                size="md"
+                className="flex-1"
+              >
+                Cancelar
+              </FantasyButton>
+            </div>
+          </form>
+        </FantasyPanel>
       </div>
-
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-30 z-50"
-        onClick={onClose}
-      />
-    </>
+    </div>
   );
 }

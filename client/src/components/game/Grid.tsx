@@ -14,13 +14,14 @@ export default function Grid() {
   const gridRef = useRef<THREE.Group>(null);
   const { camera } = useThree();
   const grassTexture = useTexture("/textures/grass.png");
-  
+
   const { 
     selectedBuilding, 
-    placedBuildings, 
     previewPosition, 
-    setPreviewPosition,
-    placeBuilding,
+    placedBuildings, 
+    npcs,
+    selectedBuildingId,
+    placeBuilding, 
     clearSelection 
   } = useBuilding();
 
@@ -46,7 +47,7 @@ export default function Grid() {
         const isOccupied = placedBuildings.some(
           building => building.gridX === x && building.gridZ === z
         );
-        
+
         tiles.push(
           <group key={`tile-${x}-${z}`} position={[worldPos.x, 0, worldPos.z]}>
             {/* Ground tile */}
@@ -57,7 +58,7 @@ export default function Grid() {
                 color={isOccupied ? "#ffcccc" : "#ffffff"}
               />
             </mesh>
-            
+
             {/* Tile border */}
             <mesh position={[0, 0.051, 0]}>
               <boxGeometry args={[TILE_SIZE, 0.01, TILE_SIZE]} />
@@ -140,6 +141,30 @@ export default function Grid() {
             isPreview={false}
             isValid={true}
             buildingId={building.id}
+          />
+        );
+      })}
+
+      {/* NPCs no mundo */}
+      {npcs.map((npc) => {
+        const building = placedBuildings.find(b => b.id === npc.houseId);
+        if (!building) return null;
+
+        const worldPos = gridToWorld(building.gridX, building.gridZ, TILE_SIZE);
+        // Posicionar NPC perto da casa
+        const npcPos: [number, number, number] = [
+          worldPos.x + (Math.random() - 0.5) * 1.5,
+          0,
+          worldPos.z + (Math.random() - 0.5) * 1.5
+        ];
+
+        return (
+          <NPC
+            key={npc.id}
+            position={npcPos}
+            firstName={npc.firstName}
+            lastName={npc.lastName}
+            isSelected={selectedBuildingId === npc.houseId}
           />
         );
       })}

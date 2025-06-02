@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useBuilding } from "../../lib/stores/useBuilding";
 import { useIsMobile } from "../../hooks/use-is-mobile";
-import NPCCreationPanel from "./NPCCreationPanel";
 import { FantasyPanel, FantasyButton } from "./fantasy-ui";
+import NPCCreationPanel from "./NPCCreationPanel";
+import { Canvas } from "@react-three/fiber";
+import NPC from "../game/NPC";
 
 interface BuildingDetailsPanelProps {
   buildingId: string;
@@ -83,7 +85,7 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                               <p className="text-xs text-blue-600">Morador</p>
                             </div>
                           </div>
-                          
+
                           {/* NPC Action Buttons */}
                           <div className="flex gap-1">
                             <button
@@ -118,6 +120,14 @@ export default function BuildingDetailsPanel({ buildingId, onClose }: BuildingDe
                         </div>
                       </div>
                     ))}
+                     {/* 3D NPC rendering */}
+                     <Canvas style={{ width: '100%', height: '200px' }}>
+                        <ambientLight intensity={0.5} />
+                        <directionalLight position={[0, 5, 5]} />
+                        {buildingNPCs.map((npc, index) => (
+                            <NPC key={npc.id} position={[index * 2 - buildingNPCs.length, 0, 0]} />
+                        ))}
+                    </Canvas>
                   </div>
                 )}
               </div>

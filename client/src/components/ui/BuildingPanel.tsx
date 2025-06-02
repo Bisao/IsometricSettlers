@@ -35,42 +35,65 @@ export default function BuildingPanel({ isOpen, onClose }: BuildingPanelProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
         onClick={onClose}
       />
       
       {/* Panel */}
-      <div className={`relative ${isMobile ? 'w-11/12 max-w-sm' : 'w-96'} max-h-[80vh] overflow-y-auto`}>
+      <div className={`relative ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'} max-h-[90vh] overflow-y-auto`}></div>
         <FantasyPanel title="🏗️ Painel de Estruturas" onClose={onClose}>
           <div className="space-y-4">
             <p className="text-amber-800 text-sm font-medium text-center">
               Selecione uma estrutura para posicionar no mundo
             </p>
             
-            <div className="space-y-3">
+            <div className="grid gap-4">
               {buildings.map((building) => (
-                <div key={building.id} className="space-y-2">
-                  <FantasyButton
-                    onClick={() => handleBuildingSelect(building)}
-                    variant={selectedBuilding?.id === building.id ? "success" : "primary"}
-                    size={isMobile ? "sm" : "md"}
-                    className="w-full"
-                  >
-                    <span className="text-xl">{building.icon}</span>
-                    <span>{building.name}</span>
-                    {selectedBuilding?.id === building.id && (
-                      <span className="text-xs bg-green-800 px-2 py-1 rounded-full">
-                        SELECIONADO
-                      </span>
-                    )}
-                  </FantasyButton>
+                <div key={building.id} className={`
+                  relative overflow-hidden rounded-xl border-2 transition-all duration-300
+                  ${selectedBuilding?.id === building.id 
+                    ? 'border-green-400 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg scale-105' 
+                    : 'border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 hover:shadow-md hover:scale-102'
+                  }
+                `}>
+                  {selectedBuilding?.id === building.id && (
+                    <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                      ✓ SELECIONADO
+                    </div>
+                  )}
                   
-                  <p className="text-xs text-amber-700 text-center italic">
-                    {building.description}
-                  </p>
+                  <div className="p-4">
+                    <div className="text-center mb-3">
+                      <div className="text-4xl mb-2 animate-bounce">{building.icon}</div>
+                      <h3 className="font-bold text-lg text-amber-900">{building.name}</h3>
+                    </div>
+                    
+                    <p className="text-sm text-amber-700 text-center mb-4 leading-relaxed">
+                      {building.description}
+                    </p>
+                    
+                    <FantasyButton
+                      onClick={() => handleBuildingSelect(building)}
+                      variant={selectedBuilding?.id === building.id ? "success" : "primary"}
+                      size="md"
+                      className="w-full"
+                    >
+                      {selectedBuilding?.id === building.id ? (
+                        <>
+                          <span>✓</span>
+                          <span>Selecionado</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🎯</span>
+                          <span>Selecionar</span>
+                        </>
+                      )}
+                    </FantasyButton>
+                  </div>
                 </div>
               ))}
             </div>

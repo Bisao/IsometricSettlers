@@ -1,0 +1,27 @@
+The above error occurred in the <Grid> component:
+
+    at Grid (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/src/components/game/Grid.tsx:32:19)
+    at group
+    at div
+    at GameScene (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/src/components/game/GameScene.tsx:32:3)
+    at Suspense
+    at ErrorBoundary (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:16490:5)
+    at FiberProvider (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:18170:21)
+    at Provider (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:17779:3)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+setPreviewPosition is not defined
+setPreviewPosition is not defined
+The above error occurred in the <ForwardRef(Canvas)> component:
+
+    at Canvas (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:18236:3)
+    at FiberProvider (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:18170:21)
+    at CanvasWrapper
+    at div
+    at QueryClientProvider (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=2b2bccaa:2805:3)
+    at App (https://3a4450a1-927d-40b2-8619-c0842251390a-00-1fy5xmqveugun.riker.replit.dev/src/App.tsx?v=BD9L5gGXNjqIq9w5hfWOY:35:31)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+setPreviewPosition is not defined
+THREE.WebGLRenderer: Context Lost.

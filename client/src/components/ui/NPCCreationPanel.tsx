@@ -16,6 +16,25 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
 
   console.log('NPCCreationPanel rendered for house:', houseId);
 
+  const firstNames = [
+    "Ana", "João", "Maria", "Pedro", "Carla", "Bruno", "Sofia", "Lucas", 
+    "Beatriz", "Gabriel", "Camila", "Rafael", "Juliana", "Diego", "Larissa",
+    "Felipe", "Mariana", "Thiago", "Isabela", "Gustavo", "Amanda", "Rodrigo"
+  ];
+
+  const lastNames = [
+    "Silva", "Santos", "Oliveira", "Souza", "Pereira", "Costa", "Rodrigues",
+    "Almeida", "Nascimento", "Lima", "Araújo", "Fernandes", "Carvalho", "Gomes",
+    "Martins", "Rocha", "Ribeiro", "Alves", "Monteiro", "Mendes", "Cardoso"
+  ];
+
+  const generateRandomNames = () => {
+    const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    setFirstName(randomFirstName);
+    setLastName(randomLastName);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (firstName.trim() && lastName.trim()) {
@@ -49,6 +68,20 @@ export default function NPCCreationPanel({ houseId, onClose }: NPCCreationPanelP
             </div>
 
             <div className="space-y-5">
+              {/* Random Name Generator Button */}
+              <div className="text-center">
+                <FantasyButton
+                  type="button"
+                  onClick={generateRandomNames}
+                  variant="secondary"
+                  size="sm"
+                  className="mb-4"
+                >
+                  <span>🎲</span>
+                  <span>Gerar Nomes Aleatórios</span>
+                </FantasyButton>
+              </div>
+
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-purple-900 font-bold text-sm">
                   <span>👤</span>

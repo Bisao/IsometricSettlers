@@ -210,44 +210,49 @@ export default function NPCInventoryPanel({ npcId, npcName, onClose }: NPCInvent
             </div>
 
             {selectedTab === "inventory" ? (
-              <div className="flex gap-4 h-full">
+              <div className="space-y-6">
                 {/* Equipment Panel */}
-                <div className="w-72 flex-shrink-0">
+                <div>
                   <h3 className="text-lg font-bold text-amber-900 mb-3">Equipment</h3>
                   
-                  {/* Currency */}
-                  <div className="mb-4 p-3 bg-amber-100 rounded-lg border border-amber-300">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-yellow-600">🪙</span>
-                          <span className="text-amber-700 text-sm">Gold</span>
+                  <div className="flex gap-4">
+                    {/* Currency */}
+                    <div className="w-64 p-3 bg-amber-100 rounded-lg border border-amber-300 h-fit">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-yellow-600">🪙</span>
+                            <span className="text-amber-700 text-sm">Gold</span>
+                          </div>
+                          <span className="font-bold text-amber-900">{npcStats.gold}</span>
                         </div>
-                        <span className="font-bold text-amber-900">{npcStats.gold}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-400">🪙</span>
-                          <span className="text-amber-700 text-sm">Silver</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-400">🪙</span>
+                            <span className="text-amber-700 text-sm">Silver</span>
+                          </div>
+                          <span className="font-bold text-amber-900">{npcStats.silver}</span>
                         </div>
-                        <span className="font-bold text-amber-900">{npcStats.silver}</span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Equipment Slots Grid */}
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    {EQUIPMENT_SLOTS.slice(0, 9).map(renderEquipmentSlot)}
-                  </div>
+                    {/* Equipment Slots */}
+                    <div className="flex-1">
+                      {/* Main Equipment Slots Grid */}
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        {EQUIPMENT_SLOTS.slice(0, 9).map(renderEquipmentSlot)}
+                      </div>
 
-                  {/* Mount slot */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {EQUIPMENT_SLOTS.slice(9).map(renderEquipmentSlot)}
+                      {/* Mount and special slots */}
+                      <div className="grid grid-cols-2 gap-3 max-w-44">
+                        {EQUIPMENT_SLOTS.slice(9).map(renderEquipmentSlot)}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Inventory Grid */}
-                <div className="flex-1 min-w-0">
+                <div>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-bold text-amber-900">Inventory Slots (48)</h3>
                     <div className="text-sm text-amber-700">

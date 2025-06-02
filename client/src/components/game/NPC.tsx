@@ -1,4 +1,3 @@
-
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
@@ -16,35 +15,35 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
   const npcRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Mesh>(null);
   const eyesRef = useRef<THREE.Group>(null);
-  
+
   // Generate consistent appearance based on name
   const nameHash = (firstName + lastName).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  
+
   // Clothing colors
   const shirtColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
   const pantsColors = ['#2C3E50', '#34495E', '#8B4513', '#2F4F4F', '#696969', '#556B2F'];
   const hairColors = ['#8B4513', '#654321', '#2F1B14', '#FFD700', '#FF4500', '#000000', '#A0522D'];
   const skinTones = ['#FDBCB4', '#F1C27D', '#E0AC69', '#C68642', '#8D5524'];
-  
+
   const shirtColor = shirtColors[nameHash % shirtColors.length];
   const pantsColor = pantsColors[(nameHash + 1) % pantsColors.length];
   const hairColor = hairColors[(nameHash + 2) % hairColors.length];
   const skinTone = skinTones[(nameHash + 3) % skinTones.length];
   const hasGlasses = nameHash % 4 === 0;
   const hasHat = nameHash % 5 === 0;
-  
+
   // Simple breathing and idle animations
   useFrame((state) => {
     if (npcRef.current) {
       npcRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
     }
-    
+
     // Head movement
     if (headRef.current) {
       headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.2;
       headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.6) * 0.05;
     }
-    
+
     // Eye blinking
     if (eyesRef.current) {
       const blinkTime = Math.sin(state.clock.elapsedTime * 0.1) > 0.95 ? 0.3 : 1;
@@ -126,7 +125,7 @@ export default function NPC({ position, firstName, lastName, isSelected = false,
           <boxGeometry args={[0.04, 0.04, 0.02]} />
           <meshLambertMaterial color="#FFFFFF" />
         </mesh>
-        
+
         {/* Pupils */}
         <mesh position={[-0.06, 0.98, 0.12]} castShadow>
           <boxGeometry args={[0.02, 0.02, 0.01]} />

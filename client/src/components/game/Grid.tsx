@@ -51,7 +51,7 @@ export default function Grid() {
           <group key={`tile-${x}-${z}`} position={[worldPos.x, 0, worldPos.z]}>
             {/* Ground tile */}
             <mesh receiveShadow>
-              <boxGeometry args={[TILE_SIZE * 0.95, 0.1, TILE_SIZE * 0.95]} />
+              <boxGeometry args={[TILE_SIZE, 0.1, TILE_SIZE]} />
               <meshLambertMaterial 
                 map={grassTexture} 
                 color={isOccupied ? "#ffcccc" : "#ffffff"}

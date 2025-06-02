@@ -1,0 +1,40 @@
+Clicked on building: house-1748849402467
+Opening NPC Creation Panel for house: house-1748849402467
+NPCCreationPanel rendered for house: house-1748849402467
+Created NPC: Camila Rocha for house house-1748849402467
+Grid ref is available with 228 children
+(firstName + lastName).split is not a function
+(firstName + lastName).split is not a function
+The above error occurred in the <NPC> component:
+
+    at NPC (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/src/components/game/NPC.tsx:22:31)
+    at Suspense
+    at ErrorBoundary (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:16490:5)
+    at FiberProvider (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:18170:21)
+    at Provider (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:17779:3)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+(firstName + lastName).split is not a function
+(firstName + lastName).split is not a function
+The above error occurred in the <ForwardRef(Canvas)> component:
+
+    at Canvas (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:18236:3)
+    at FiberProvider (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-A3GN3WMN.js?v=2b2bccaa:18170:21)
+    at CanvasWrapper
+    at div
+    at div
+    at div
+    at div
+    at div
+    at FantasyPanel (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/src/components/ui/fantasy-ui.tsx:18:32)
+    at div
+    at div
+    at BuildingDetailsPanel (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/src/components/ui/BuildingDetailsPanel.tsx:25:48)
+    at div
+    at QueryClientProvider (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=2b2bccaa:2805:3)
+    at App (https://662ba200-ecf3-4ebe-b1be-337c385f37d9-00-3ggl9lqh4ia6p.picard.replit.dev/src/App.tsx?v=Rl066WyyFvOBMYqeyNy-4:35:31)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+(firstName + lastName).split is not a function
+THREE.WebGLRenderer: Context Lost.

@@ -37,13 +37,12 @@ export default function Camera() {
 
   // Handle camera mode transitions
   useEffect(() => {
-    const npcWithVision = npcs.find(npc => npc.showVision);
-    if (controlledNPCId || npcWithVision) {
+    if (controlledNPCId) {
       isFollowingMode.current = true;
     } else {
       isFollowingMode.current = false;
     }
-  }, [controlledNPCId, npcs]);
+  }, [controlledNPCId]);
 
   // Mouse wheel zoom handler for isometric view
   useEffect(() => {
@@ -78,22 +77,21 @@ export default function Camera() {
 
     const lerpSpeed = 2.0; // Camera movement speed
     
-    if (isFollowingMode.current) {
-      // Find the NPC to follow (controlled NPC or NPC with vision active)
-      const npcWithVision = npcs.find(npc => npc.showVision);
-      const targetNPC = controlledNPCId ? npcs.find(npc => npc.id === controlledNPCId) : npcWithVision;
+    if (isFollowingMode.current && controlledNPCId) {
+      // Find the controlled NPC
+      const controlledNPC = npcs.find(npc => npc.id === controlledNPCId);
       
-      if (targetNPC) {
+      if (controlledNPC) {
         // Get NPC position
         let npcWorldPos: THREE.Vector3;
         
-        if (targetNPC.gridX !== undefined && targetNPC.gridZ !== undefined) {
-          // Use NPC position
-          const worldPos = gridToWorld(targetNPC.gridX, targetNPC.gridZ, 1);
+        if (controlledNPC.gridX !== undefined && controlledNPC.gridZ !== undefined) {
+          // Use controlled position
+          const worldPos = gridToWorld(controlledNPC.gridX, controlledNPC.gridZ, 1);
           npcWorldPos = new THREE.Vector3(worldPos.x, 0, worldPos.z);
         } else {
           // Use house position as fallback
-          const building = placedBuildings.find(b => b.id === targetNPC.houseId);
+          const building = placedBuildings.find(b => b.id === controlledNPC.houseId);
           if (building) {
             const worldPos = gridToWorld(building.gridX, building.gridZ, 1);
             npcWorldPos = new THREE.Vector3(worldPos.x, 0, worldPos.z);
@@ -102,30 +100,16 @@ export default function Camera() {
           }
         }
 
-        // Calculate camera position - different for vision mode
-        let targetCameraPos: THREE.Vector3;
+        // Calculate isometric camera position
+        // Isometric angle: 45 degrees on both X and Y axes
+        const distance = zoomLevel.current;
+        const angle = Math.PI / 4; // 45 degrees
         
-        if (npcWithVision && npcWithVision.id === targetNPC.id) {
-          // Vision mode: position camera closer and lower for better cone view
-          const distance = Math.min(zoomLevel.current, 6); // Closer for vision
-          const angle = Math.PI / 6; // Lower angle (30 degrees)
-          
-          const offsetX = distance * Math.cos(angle);
-          const offsetY = distance * 0.6; // Lower height
-          const offsetZ = distance * Math.cos(angle);
-          
-          targetCameraPos = npcWorldPos.clone().add(new THREE.Vector3(offsetX, offsetY, offsetZ));
-        } else {
-          // Normal isometric view
-          const distance = zoomLevel.current;
-          const angle = Math.PI / 4; // 45 degrees
-          
-          const offsetX = distance * Math.cos(angle);
-          const offsetY = distance * Math.sin(angle);
-          const offsetZ = distance * Math.cos(angle);
-          
-          targetCameraPos = npcWorldPos.clone().add(new THREE.Vector3(offsetX, offsetY, offsetZ));
-        }
+        const offsetX = distance * Math.cos(angle);
+        const offsetY = distance * Math.sin(angle);
+        const offsetZ = distance * Math.cos(angle);
+        
+        const targetCameraPos = npcWorldPos.clone().add(new THREE.Vector3(offsetX, offsetY, offsetZ));
         
         // Smooth camera position interpolation
         camera.position.lerp(targetCameraPos, lerpSpeed * delta);
